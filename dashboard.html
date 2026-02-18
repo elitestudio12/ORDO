@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ORDO · لوحة التحكم</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --green:#1b5e42;--green-light:#236b50;--green-dark:#133d2c;
+  --accent:#c8a84b;--white:#fff;--off:#f4f6f5;
+  --text:#1a2a22;--muted:#5a7066;--border:#dde6e2;
+  --red:#c62828;--sidebar-w:260px;
+}
+html,body{height:100%;font-family:'Cairo','Tajawal',sans-serif;direction:rtl;background:var(--off);color:var(--text);overflow-x:hidden}
+
+/* ===== SIDEBAR ===== */
+.sidebar{position:fixed;top:0;right:0;width:var(--sidebar-w);height:100vh;background:var(--green-dark);display:flex;flex-direction:column;z-index:100;overflow-y:auto}
+.sidebar-brand{padding:1.5rem;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;gap:0.8rem}
+.sidebar-logo{font-family:'Tajawal',sans-serif;font-size:1.5rem;font-weight:800;color:var(--white);letter-spacing:3px}
+.sidebar-flag{width:22px;height:15px;border-radius:2px;object-fit:cover}
+.sidebar-user{padding:1.2rem 1.5rem;border-bottom:1px solid rgba(255,255,255,0.06)}
+.user-avatar{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#e8c56a);display:flex;align-items:center;justify-content:center;font-family:'Tajawal',sans-serif;font-size:1.2rem;font-weight:800;color:var(--white);margin-bottom:0.8rem}
+.user-name{font-size:0.9rem;font-weight:700;color:var(--white);margin-bottom:0.2rem}
+.user-type{font-size:0.72rem;color:var(--accent);font-weight:500}
+.user-nin{font-size:0.68rem;color:rgba(255,255,255,0.35);font-weight:300;margin-top:0.2rem;font-family:'Tajawal',sans-serif;letter-spacing:0.5px}
+.sidebar-nav{flex:1;padding:1rem 0}
+.nav-group-label{font-size:0.62rem;font-weight:700;color:rgba(255,255,255,0.25);text-transform:uppercase;letter-spacing:2px;padding:0.8rem 1.5rem 0.4rem}
+.nav-item{display:flex;align-items:center;gap:0.9rem;padding:0.75rem 1.5rem;color:rgba(255,255,255,0.65);font-size:0.85rem;font-weight:500;cursor:pointer;transition:all 0.2s;border-right:3px solid transparent;text-decoration:none}
+.nav-item i{width:20px;text-align:center;font-size:0.9rem;color:rgba(255,255,255,0.45)}
+.nav-item:hover{color:var(--white);background:rgba(255,255,255,0.05)}
+.nav-item.active{color:var(--white);background:rgba(255,255,255,0.08);border-right-color:var(--accent)}
+.nav-item.active i{color:var(--accent)}
+.sidebar-bottom{padding:1rem 1.5rem;border-top:1px solid rgba(255,255,255,0.06)}
+.logout-btn{display:flex;align-items:center;gap:0.8rem;color:rgba(255,255,255,0.45);font-size:0.82rem;cursor:pointer;transition:color 0.2s;padding:0.5rem 0;background:none;border:none;font-family:'Cairo',sans-serif;width:100%}
+.logout-btn:hover{color:var(--red)}
+.logout-btn i{font-size:0.9rem}
+
+/* ===== MAIN ===== */
+.main{margin-right:var(--sidebar-w);min-height:100vh;display:flex;flex-direction:column}
+.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:0 2rem;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.topbar-title{font-family:'Tajawal',sans-serif;font-size:1.2rem;font-weight:800;color:var(--text)}
+.topbar-right{display:flex;align-items:center;gap:1rem}
+.notif-btn{width:38px;height:38px;border-radius:8px;background:var(--off);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);position:relative;transition:all 0.2s}
+.notif-btn:hover{border-color:var(--green);color:var(--green)}
+.notif-dot{position:absolute;top:6px;right:6px;width:8px;height:8px;background:var(--red);border-radius:50%;border:2px solid var(--white)}
+
+/* ===== CONTENT ===== */
+.content{padding:2rem;flex:1}
+.page{display:none}
+.page.active{display:block}
+
+/* ===== HOME PAGE ===== */
+.welcome-bar{background:linear-gradient(135deg,var(--green),var(--green-light));border-radius:16px;padding:2rem;color:var(--white);margin-bottom:2rem;position:relative;overflow:hidden}
+.welcome-bar::after{content:'ORDO';position:absolute;left:-10px;top:50%;transform:translateY(-50%);font-family:'Tajawal',sans-serif;font-size:6rem;font-weight:800;color:rgba(255,255,255,0.05);pointer-events:none;letter-spacing:4px}
+.welcome-title{font-family:'Tajawal',sans-serif;font-size:1.5rem;font-weight:800;margin-bottom:0.4rem}
+.welcome-title span{color:var(--accent)}
+.welcome-sub{font-size:0.85rem;opacity:0.7;font-weight:300}
+.quick-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1.2rem;margin-bottom:2rem}
+.qcard{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:1.5rem;cursor:pointer;transition:all 0.25s}
+.qcard:hover{border-color:var(--green);box-shadow:0 6px 20px rgba(27,94,66,0.1);transform:translateY(-3px)}
+.qcard-icon{width:46px;height:46px;border-radius:12px;background:rgba(27,94,66,0.07);display:flex;align-items:center;justify-content:center;color:var(--green);font-size:1.2rem;margin-bottom:1rem}
+.qcard h4{font-size:0.88rem;font-weight:700;color:var(--text);margin-bottom:0.2rem}
+.qcard p{font-size:0.75rem;color:var(--muted);font-weight:400}
+.section-label{font-size:0.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:1rem;display:block}
+.activity-list{background:var(--white);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.activity-item{display:flex;align-items:center;gap:1rem;padding:1rem 1.5rem;border-bottom:1px solid var(--border);transition:background 0.2s}
+.activity-item:last-child{border-bottom:none}
+.activity-item:hover{background:var(--off)}
+.act-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:0.95rem;flex-shrink:0}
+.act-text{flex:1}
+.act-text strong{display:block;font-size:0.85rem;font-weight:700;color:var(--text);margin-bottom:0.15rem}
+.act-text span{font-size:0.75rem;color:var(--muted)}
+.act-status{font-size:0.7rem;font-weight:700;padding:0.2rem 0.6rem;border-radius:50px}
+.status-pending{background:rgba(255,152,0,0.1);color:#e65100}
+.status-done{background:rgba(27,94,66,0.1);color:var(--green)}
+.status-cancel{background:rgba(198,40,40,0.08);color:var(--red)}
+
+/* ===== PROFILE PAGE ===== */
+.profile-layout{display:grid;grid-template-columns:300px 1fr;gap:2rem;align-items:start}
+.profile-card{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:2rem;text-align:center}
+.profile-avatar-wrap{position:relative;width:100px;margin:0 auto 1.2rem}
+.profile-avatar{width:100px;height:100px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--accent));display:flex;align-items:center;justify-content:center;font-family:'Tajawal',sans-serif;font-size:2.5rem;font-weight:800;color:var(--white)}
+.avatar-edit{position:absolute;bottom:0;left:0;width:28px;height:28px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--white);font-size:0.65rem;cursor:pointer;border:2px solid var(--white)}
+.profile-name{font-family:'Tajawal',sans-serif;font-size:1.2rem;font-weight:800;color:var(--text);margin-bottom:0.2rem}
+.profile-type{font-size:0.78rem;color:var(--accent);font-weight:600;margin-bottom:0.3rem}
+.profile-nin{font-size:0.72rem;color:var(--muted);font-family:'Tajawal',sans-serif;margin-bottom:1.2rem}
+.profile-stats{display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;border-top:1px solid var(--border);padding-top:1.2rem}
+.pstat{text-align:center}
+.pstat strong{display:block;font-size:1.4rem;font-weight:800;color:var(--green)}
+.pstat span{font-size:0.72rem;color:var(--muted)}
+.edit-form-card{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:2rem}
+.edit-form-card h3{font-family:'Tajawal',sans-serif;font-size:1.1rem;font-weight:800;color:var(--text);margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid var(--border)}
+.form-group{margin-bottom:1.1rem}
+.form-group label{display:block;font-size:0.76rem;font-weight:700;color:var(--text);margin-bottom:0.4rem;letter-spacing:0.2px}
+.field{width:100%;padding:0.8rem 1rem;border:1.5px solid var(--border);border-radius:10px;font-family:'Cairo',sans-serif;font-size:0.88rem;color:var(--text);background:var(--white);transition:all 0.2s;outline:none}
+.field:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(27,94,66,0.07)}
+.field:disabled{background:var(--off);color:var(--muted);cursor:not-allowed}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.save-btn{padding:0.85rem 2rem;background:var(--green);color:var(--white);border:none;border-radius:10px;font-family:'Cairo',sans-serif;font-size:0.9rem;font-weight:700;cursor:pointer;transition:all 0.3s;display:flex;align-items:center;gap:0.6rem}
+.save-btn:hover{background:var(--green-dark);transform:translateY(-2px);box-shadow:0 6px 18px rgba(27,94,66,0.2)}
+.saved-msg{display:none;color:var(--green);font-size:0.8rem;font-weight:600;margin-top:0.5rem}
+.saved-msg i{margin-left:0.3rem}
+
+/* ===== SCAN PAGE ===== */
+.scan-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+.scan-card{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:2rem;transition:all 0.25s}
+.scan-card:hover{border-color:var(--green)}
+.scan-card-header{display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem}
+.scan-card-icon{width:54px;height:54px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.4rem}
+.scan-card-icon.nin-ic{background:rgba(27,94,66,0.08);color:var(--green)}
+.scan-card-icon.chifa-ic{background:rgba(200,168,75,0.1);color:var(--accent)}
+.scan-card-icon.pc-ic{background:rgba(33,150,243,0.08);color:#1565c0}
+.scan-card-title{font-family:'Tajawal',sans-serif;font-size:1.05rem;font-weight:800;color:var(--text)}
+.scan-card-sub{font-size:0.75rem;color:var(--muted);font-weight:400;margin-top:0.1rem}
+.scan-method-tabs{display:flex;gap:0.5rem;margin-bottom:1.5rem}
+.smethod{flex:1;padding:0.6rem;border:1.5px solid var(--border);border-radius:8px;font-family:'Cairo',sans-serif;font-size:0.75rem;font-weight:700;color:var(--muted);cursor:pointer;text-align:center;transition:all 0.2s;background:none}
+.smethod.active{border-color:var(--green);color:var(--green);background:rgba(27,94,66,0.05)}
+.scan-view{display:none}
+.scan-view.active{display:block}
+.scan-zone{border:2px dashed var(--border);border-radius:14px;padding:2rem;text-align:center;cursor:pointer;transition:all 0.3s;position:relative;overflow:hidden}
+.scan-zone:hover{border-color:var(--green);background:rgba(27,94,66,0.02)}
+.scan-zone.drag-over{border-color:var(--accent);background:rgba(200,168,75,0.04)}
+.scan-zone i{font-size:2.5rem;color:var(--border);margin-bottom:1rem;display:block}
+.scan-zone p{font-size:0.82rem;color:var(--muted);margin-bottom:0.4rem}
+.scan-zone small{font-size:0.72rem;color:rgba(90,112,102,0.6)}
+.scan-preview{margin-top:1rem;display:none;position:relative}
+.scan-preview img{width:100%;border-radius:10px;max-height:200px;object-fit:contain;border:1px solid var(--border)}
+.scan-preview-del{position:absolute;top:8px;left:8px;width:28px;height:28px;background:rgba(198,40,40,0.9);border-radius:50%;border:none;color:var(--white);font-size:0.7rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.phone-scan{background:var(--off);border-radius:14px;padding:2rem;text-align:center}
+.phone-qr{width:120px;height:120px;background:var(--white);border:1px solid var(--border);border-radius:10px;margin:0 auto 1rem;display:flex;align-items:center;justify-content:center;font-size:3rem;color:var(--border)}
+.phone-scan p{font-size:0.8rem;color:var(--muted);line-height:1.7}
+.cam-btn{padding:0.8rem 1.5rem;background:var(--green);color:var(--white);border:none;border-radius:8px;font-family:'Cairo',sans-serif;font-size:0.85rem;font-weight:700;cursor:pointer;margin-top:1rem;display:inline-flex;align-items:center;gap:0.5rem;transition:all 0.2s}
+.cam-btn:hover{background:var(--green-dark)}
+.doc-status{margin-top:1rem;padding:0.8rem 1rem;border-radius:10px;font-size:0.8rem;font-weight:600;display:none}
+.doc-status.ok{background:rgba(27,94,66,0.08);color:var(--green);border:1px solid rgba(27,94,66,0.15)}
+.doc-status.pending{background:rgba(255,152,0,0.08);color:#e65100;border:1px solid rgba(255,152,0,0.15)}
+.doc-field{margin-bottom:0.8rem}
+.doc-field label{display:block;font-size:0.73rem;font-weight:700;color:var(--muted);margin-bottom:0.3rem;text-transform:uppercase;letter-spacing:0.5px}
+.doc-field input{width:100%;padding:0.65rem 0.9rem;border:1.5px solid var(--border);border-radius:8px;font-family:'Cairo',sans-serif;font-size:0.85rem;color:var(--text);outline:none;transition:border 0.2s}
+.doc-field input:focus{border-color:var(--green)}
+.doc-save-btn{padding:0.75rem 1.5rem;background:var(--green);color:var(--white);border:none;border-radius:8px;font-family:'Cairo',sans-serif;font-size:0.85rem;font-weight:700;cursor:pointer;margin-top:1rem;display:flex;align-items:center;gap:0.5rem;transition:all 0.2s;width:100%;justify-content:center}
+.doc-save-btn:hover{background:var(--green-dark)}
+
+/* PC upload card full width */
+.scan-card.full{grid-column:span 2}
+
+/* TOAST */
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(100px);background:var(--green);color:var(--white);padding:0.9rem 2rem;border-radius:50px;font-size:0.85rem;font-weight:600;box-shadow:0 8px 30px rgba(0,0,0,0.2);transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1);z-index:999;display:flex;align-items:center;gap:0.6rem}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .sidebar{display:none}
+  .main{margin-right:0}
+  .profile-layout,.scan-grid{grid-template-columns:1fr}
+  .scan-card.full{grid-column:span 1}
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/7/77/Flag_of_Algeria.svg" class="sidebar-flag" alt="">
+    <span class="sidebar-logo">ORDO</span>
+  </div>
+  <div class="sidebar-user">
+    <div class="user-avatar" id="sb-avatar">م</div>
+    <div class="user-name" id="sb-name">مستخدم</div>
+    <div class="user-type" id="sb-type">مواطن</div>
+    <div class="user-nin" id="sb-nin">NIN: ···</div>
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-group-label">القائمة الرئيسية</div>
+    <a class="nav-item active" onclick="showPage('home',this)">
+      <i class="fas fa-house"></i> الرئيسية
+    </a>
+    <a class="nav-item" onclick="showPage('profile',this)">
+      <i class="fas fa-user-circle"></i> معلوماتي الشخصية
+    </a>
+    <a class="nav-item" onclick="showPage('scan',this)">
+      <i class="fas fa-camera"></i> سكان الوثائق
+    </a>
+    <div class="nav-group-label">الخدمات</div>
+    <a class="nav-item" href="appointments.html">
+      <i class="fas fa-calendar-check"></i> حجز موعد
+    </a>
+    <a class="nav-item" href="appointments.html">
+      <i class="fas fa-clock-rotate-left"></i> مواعيدي
+    </a>
+    <a class="nav-item" href="#">
+      <i class="fas fa-bell"></i> الإشعارات
+    </a>
+  </div>
+  <div class="sidebar-bottom">
+    <button class="logout-btn" onclick="logout()">
+      <i class="fas fa-arrow-right-from-bracket"></i>
+      تسجيل الخروج
+    </button>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <span class="topbar-title" id="topbar-title">الرئيسية</span>
+    <div class="topbar-right">
+      <div class="notif-btn"><i class="fas fa-bell"></i><div class="notif-dot"></div></div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- HOME PAGE -->
+    <div class="page active" id="page-home">
+      <div class="welcome-bar">
+        <div class="welcome-title">مرحباً، <span id="welcome-name">مستخدم</span> 👋</div>
+        <div class="welcome-sub">ماذا تريد أن تفعل اليوم؟</div>
+      </div>
+      <div class="quick-cards">
+        <div class="qcard" onclick="showPage('scan',document.querySelector('[onclick*=scan]'))">
+          <div class="qcard-icon"><i class="fas fa-camera"></i></div>
+          <h4>سكان الوثائق</h4>
+          <p>صوّر بطاقتك أو أضفها من الجهاز</p>
+        </div>
+        <div class="qcard">
+          <div class="qcard-icon"><i class="fas fa-calendar-plus"></i></div>
+          <h4>حجز موعد</h4>
+          <p>احجز موعدك في أي مصلحة</p>
+        </div>
+        <div class="qcard" onclick="showPage('profile',document.querySelector('[onclick*=profile]'))">
+          <div class="qcard-icon"><i class="fas fa-pen-to-square"></i></div>
+          <h4>تعديل معلوماتي</h4>
+          <p>حدّث بياناتك الشخصية</p>
+        </div>
+        <div class="qcard">
+          <div class="qcard-icon"><i class="fas fa-clock-rotate-left"></i></div>
+          <h4>مواعيدي</h4>
+          <p>تابع حجوزاتك السابقة</p>
+        </div>
+      </div>
+      <span class="section-label">آخر النشاطات</span>
+      <div class="activity-list">
+        <div class="activity-item">
+          <div class="act-icon" style="background:rgba(27,94,66,0.08);color:var(--green)"><i class="fas fa-passport"></i></div>
+          <div class="act-text">
+            <strong>حجز موعد — جواز السفر</strong>
+            <span>بلدية الجزائر الوسطى · 15 فبراير 2025</span>
+          </div>
+          <span class="act-status status-pending">قيد الانتظار</span>
+        </div>
+        <div class="activity-item">
+          <div class="act-icon" style="background:rgba(200,168,75,0.1);color:var(--accent)"><i class="fas fa-id-card"></i></div>
+          <div class="act-text">
+            <strong>بطاقة التعريف الوطنية — تجديد</strong>
+            <span>بلدية حيدرة · 02 يناير 2025</span>
+          </div>
+          <span class="act-status status-done">منجز</span>
+        </div>
+        <div class="activity-item">
+          <div class="act-icon" style="background:rgba(198,40,40,0.07);color:var(--red)"><i class="fas fa-hospital"></i></div>
+          <div class="act-text">
+            <strong>موعد طبي — عيادة بن عكنون</strong>
+            <span>20 ديسمبر 2024</span>
+          </div>
+          <span class="act-status status-cancel">ملغى</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROFILE PAGE -->
+    <div class="page" id="page-profile">
+      <div class="profile-layout">
+        <div class="profile-card">
+          <div class="profile-avatar-wrap">
+            <div class="profile-avatar" id="p-avatar">م</div>
+            <div class="avatar-edit"><i class="fas fa-pen"></i></div>
+          </div>
+          <div class="profile-name" id="p-fullname">مستخدم</div>
+          <div class="profile-type" id="p-type">مواطن</div>
+          <div class="profile-nin" id="p-nin">NIN: ···</div>
+          <div class="profile-stats">
+            <div class="pstat"><strong>3</strong><span>مواعيد</span></div>
+            <div class="pstat"><strong>2</strong><span>وثائق</span></div>
+          </div>
+        </div>
+        <div class="edit-form-card">
+          <h3><i class="fas fa-pen-to-square" style="color:var(--green);margin-left:0.5rem;font-size:0.95rem"></i> تعديل المعلومات الشخصية</h3>
+          <div class="field-row">
+            <div class="form-group">
+              <label>الاسم</label>
+              <input class="field" id="e-fname" type="text" placeholder="الاسم الأول">
+            </div>
+            <div class="form-group">
+              <label>اللقب</label>
+              <input class="field" id="e-lname" type="text" placeholder="اللقب">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>البريد الإلكتروني</label>
+            <input class="field" id="e-email" type="email" placeholder="example@email.com">
+          </div>
+          <div class="form-group">
+            <label>رقم الهاتف</label>
+            <input class="field" id="e-phone" type="tel" placeholder="05 XX XX XX XX">
+          </div>
+          <div class="form-group">
+            <label>رقم التعريف الوطني</label>
+            <input class="field" id="e-nin" type="text" disabled>
+          </div>
+          <div class="form-group">
+            <label>نوع الحساب</label>
+            <input class="field" id="e-type" type="text" disabled>
+          </div>
+          <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
+            <button class="save-btn" onclick="saveProfile()">
+              <i class="fas fa-check"></i> حفظ التغييرات
+            </button>
+            <div class="saved-msg" id="saved-msg"><i class="fas fa-circle-check"></i>تم الحفظ بنجاح</div>
+          </div>
+
+          <!-- Change password -->
+          <div style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--border)">
+            <h3 style="font-size:1rem;margin-bottom:1.2rem"><i class="fas fa-lock" style="color:var(--green);margin-left:0.5rem"></i>تغيير كلمة المرور</h3>
+            <div class="form-group">
+              <label>كلمة المرور الجديدة</label>
+              <input class="field" id="e-pw" type="password" placeholder="••••••••">
+            </div>
+            <div class="form-group">
+              <label>تأكيد كلمة المرور الجديدة</label>
+              <input class="field" id="e-pw2" type="password" placeholder="••••••••">
+            </div>
+            <button class="save-btn" onclick="savePw()" style="background:var(--green-dark)">
+              <i class="fas fa-shield-halved"></i> تحديث كلمة المرور
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCAN PAGE -->
+    <div class="page" id="page-scan">
+      <div style="margin-bottom:1.5rem">
+        <span class="section-label">سكان وحفظ الوثائق الرسمية</span>
+        <p style="font-size:0.82rem;color:var(--muted)">يمكنك رفع صور وثائقك أو تصويرها مباشرة بكاميرا الهاتف أو الحاسوب</p>
+      </div>
+      <div class="scan-grid">
+
+        <!-- NIN CARD -->
+        <div class="scan-card" id="nin-card">
+          <div class="scan-card-header">
+            <div class="scan-card-icon nin-ic"><i class="fas fa-id-card"></i></div>
+            <div>
+              <div class="scan-card-title">بطاقة التعريف الوطنية</div>
+              <div class="scan-card-sub">Carte Nationale d'Identité</div>
+            </div>
+          </div>
+          <div class="scan-method-tabs">
+            <button class="smethod active" onclick="switchScan('nin','upload',this)"><i class="fas fa-upload"></i> رفع صورة</button>
+            <button class="smethod" onclick="switchScan('nin','phone',this)"><i class="fas fa-mobile-screen"></i> كاميرا الهاتف</button>
+          </div>
+          <div class="scan-view active" id="nin-upload">
+            <div class="scan-zone" id="nin-zone" onclick="document.getElementById('nin-file').click()" ondragover="dragOver(event,this)" ondragleave="dragLeave(this)" ondrop="dropFile(event,'nin')">
+              <i class="fas fa-cloud-arrow-up"></i>
+              <p>اسحب الصورة هنا أو اضغط للاختيار</p>
+              <small>PNG, JPG, WEBP — حتى 5MB</small>
+            </div>
+            <input type="file" id="nin-file" accept="image/*" style="display:none" onchange="previewFile(this,'nin')">
+            <div class="scan-preview" id="nin-preview">
+              <img id="nin-img" src="" alt="">
+              <button class="scan-preview-del" onclick="clearFile('nin')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="doc-status" id="nin-status"></div>
+            <div style="margin-top:1.2rem">
+              <div class="doc-field"><label>رقم البطاقة</label><input type="text" placeholder="مثال: 123456789" id="nin-num"></div>
+              <div class="doc-field"><label>تاريخ الانتهاء</label><input type="date" id="nin-exp"></div>
+              <button class="doc-save-btn" onclick="saveDoc('nin')"><i class="fas fa-save"></i> حفظ البطاقة</button>
+            </div>
+          </div>
+          <div class="scan-view" id="nin-phone">
+            <div class="phone-scan">
+              <div class="phone-qr"><i class="fas fa-qrcode"></i></div>
+              <p>امسح هذا الرمز بهاتفك لفتح كاميرا المسح مباشرة</p>
+              <button class="cam-btn" onclick="openCamera('nin')"><i class="fas fa-camera"></i> فتح الكاميرا</button>
+            </div>
+            <video id="nin-cam" style="display:none;width:100%;border-radius:10px;margin-top:1rem" autoplay></video>
+            <canvas id="nin-canvas" style="display:none"></canvas>
+            <div id="nin-cam-actions" style="display:none;margin-top:0.8rem;display:flex;gap:0.8rem">
+              <button class="cam-btn" onclick="capturePhoto('nin')" style="flex:1"><i class="fas fa-circle"></i> التقاط</button>
+              <button class="cam-btn" onclick="stopCamera('nin')" style="background:var(--red);flex:1"><i class="fas fa-stop"></i> إيقاف</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- CHIFA CARD -->
+        <div class="scan-card" id="chifa-card">
+          <div class="scan-card-header">
+            <div class="scan-card-icon chifa-ic"><i class="fas fa-notes-medical"></i></div>
+            <div>
+              <div class="scan-card-title">بطاقة الشفاء</div>
+              <div class="scan-card-sub">Carte Chifa</div>
+            </div>
+          </div>
+          <div class="scan-method-tabs">
+            <button class="smethod active" onclick="switchScan('chifa','upload',this)"><i class="fas fa-upload"></i> رفع صورة</button>
+            <button class="smethod" onclick="switchScan('chifa','phone',this)"><i class="fas fa-mobile-screen"></i> كاميرا الهاتف</button>
+          </div>
+          <div class="scan-view active" id="chifa-upload">
+            <div class="scan-zone" id="chifa-zone" onclick="document.getElementById('chifa-file').click()" ondragover="dragOver(event,this)" ondragleave="dragLeave(this)" ondrop="dropFile(event,'chifa')">
+              <i class="fas fa-cloud-arrow-up"></i>
+              <p>اسحب الصورة هنا أو اضغط للاختيار</p>
+              <small>PNG, JPG, WEBP — حتى 5MB</small>
+            </div>
+            <input type="file" id="chifa-file" accept="image/*" style="display:none" onchange="previewFile(this,'chifa')">
+            <div class="scan-preview" id="chifa-preview">
+              <img id="chifa-img" src="" alt="">
+              <button class="scan-preview-del" onclick="clearFile('chifa')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="doc-status" id="chifa-status"></div>
+            <div style="margin-top:1.2rem">
+              <div class="doc-field"><label>رقم البطاقة</label><input type="text" placeholder="رقم بطاقة الشفاء" id="chifa-num"></div>
+              <div class="doc-field"><label>تاريخ الانتهاء</label><input type="date" id="chifa-exp"></div>
+              <button class="doc-save-btn" style="background:var(--accent)" onclick="saveDoc('chifa')"><i class="fas fa-save"></i> حفظ البطاقة</button>
+            </div>
+          </div>
+          <div class="scan-view" id="chifa-phone">
+            <div class="phone-scan">
+              <div class="phone-qr"><i class="fas fa-qrcode"></i></div>
+              <p>امسح هذا الرمز بهاتفك لفتح كاميرا المسح مباشرة</p>
+              <button class="cam-btn" style="background:var(--accent)" onclick="openCamera('chifa')"><i class="fas fa-camera"></i> فتح الكاميرا</button>
+            </div>
+            <video id="chifa-cam" style="display:none;width:100%;border-radius:10px;margin-top:1rem" autoplay></video>
+            <canvas id="chifa-canvas" style="display:none"></canvas>
+          </div>
+        </div>
+
+        <!-- PC UPLOAD (full width) -->
+        <div class="scan-card full">
+          <div class="scan-card-header">
+            <div class="scan-card-icon pc-ic"><i class="fas fa-desktop"></i></div>
+            <div>
+              <div class="scan-card-title">رفع من الحاسوب</div>
+              <div class="scan-card-sub">ارفع صور وثائق متعددة دفعة واحدة</div>
+            </div>
+          </div>
+          <div class="scan-zone" onclick="document.getElementById('pc-files').click()" ondragover="dragOver(event,this)" ondragleave="dragLeave(this)" ondrop="dropMulti(event)">
+            <i class="fas fa-folder-open"></i>
+            <p>اسحب ملفات متعددة أو اضغط هنا للاختيار</p>
+            <small>يمكنك رفع بطاقة التعريف، بطاقة الشفاء، وثائق أخرى — PNG, JPG, PDF</small>
+          </div>
+          <input type="file" id="pc-files" accept="image/*,.pdf" multiple style="display:none" onchange="previewMulti(this)">
+          <div id="pc-preview-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:1rem;margin-top:1rem"></div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><i class="fas fa-circle-check"></i><span id="toast-msg"></span></div>
+
+<script>
+// ===== INIT =====
+var currentUser = null;
+
+(function(){
+  var u = localStorage.getItem('ordo_current');
+  if(!u){ window.location.href='auth.html'; return; }
+  currentUser = JSON.parse(u);
+  // Redirect facility users to their own dashboard
+  if(currentUser.role === 'facility'){ window.location.href='facility.html'; return; }
+  var init = currentUser.fname ? currentUser.fname[0] : 'م';
+  document.getElementById('sb-avatar').textContent = init;
+  document.getElementById('sb-name').textContent = (currentUser.fname||'') + ' ' + (currentUser.lname||'');
+  document.getElementById('sb-type').textContent = currentUser.type || 'مواطن';
+  document.getElementById('sb-nin').textContent = 'NIN: ' + (currentUser.nin||'').substring(0,8) + '···';
+  document.getElementById('welcome-name').textContent = currentUser.fname || 'مستخدم';
+  document.getElementById('p-avatar').textContent = init;
+  document.getElementById('p-fullname').textContent = (currentUser.fname||'') + ' ' + (currentUser.lname||'');
+  document.getElementById('p-type').textContent = currentUser.type || 'مواطن';
+  document.getElementById('p-nin').textContent = 'NIN: ' + currentUser.nin;
+  document.getElementById('e-fname').value = currentUser.fname || '';
+  document.getElementById('e-lname').value = currentUser.lname || '';
+  document.getElementById('e-email').value = currentUser.email || '';
+  document.getElementById('e-phone').value = currentUser.phone || '';
+  document.getElementById('e-nin').value = currentUser.nin || '';
+  document.getElementById('e-type').value = currentUser.type || '';
+})();
+
+// ===== NAV =====
+function showPage(name, el){
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active')});
+  document.getElementById('page-'+name).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active')});
+  if(el) el.classList.add('active');
+  var titles = {home:'الرئيسية',profile:'معلوماتي الشخصية',scan:'سكان الوثائق'};
+  document.getElementById('topbar-title').textContent = titles[name]||'';
+}
+
+function logout(){
+  localStorage.removeItem('ordo_current');
+  window.location.href='auth.html';
+}
+
+// ===== PROFILE SAVE =====
+function saveProfile(){
+  currentUser.fname = document.getElementById('e-fname').value;
+  currentUser.lname = document.getElementById('e-lname').value;
+  currentUser.email = document.getElementById('e-email').value;
+  currentUser.phone = document.getElementById('e-phone').value;
+  var users = JSON.parse(localStorage.getItem('ordo_users')||'[]');
+  var idx = users.findIndex(function(u){return u.nin===currentUser.nin});
+  if(idx>=0){users[idx]=Object.assign(users[idx],{fname:currentUser.fname,lname:currentUser.lname,email:currentUser.email,phone:currentUser.phone});}
+  localStorage.setItem('ordo_users',JSON.stringify(users));
+  localStorage.setItem('ordo_current',JSON.stringify(currentUser));
+  var init = currentUser.fname ? currentUser.fname[0] : 'م';
+  document.getElementById('sb-avatar').textContent = init;
+  document.getElementById('sb-name').textContent = currentUser.fname+' '+currentUser.lname;
+  document.getElementById('p-avatar').textContent = init;
+  document.getElementById('p-fullname').textContent = currentUser.fname+' '+currentUser.lname;
+  document.getElementById('welcome-name').textContent = currentUser.fname;
+  var msg = document.getElementById('saved-msg');
+  msg.style.display='flex';
+  setTimeout(function(){msg.style.display='none'},3000);
+  showToast('تم حفظ المعلومات بنجاح');
+}
+
+function savePw(){
+  var pw=document.getElementById('e-pw').value;
+  var pw2=document.getElementById('e-pw2').value;
+  if(!pw||pw.length<6){showToast('كلمة المرور قصيرة جداً','err');return;}
+  if(pw!==pw2){showToast('كلمتا المرور غير متطابقتين','err');return;}
+  var users=JSON.parse(localStorage.getItem('ordo_users')||'[]');
+  var idx=users.findIndex(function(u){return u.nin===currentUser.nin});
+  if(idx>=0){users[idx].pw=pw;}
+  currentUser.pw=pw;
+  localStorage.setItem('ordo_users',JSON.stringify(users));
+  localStorage.setItem('ordo_current',JSON.stringify(currentUser));
+  document.getElementById('e-pw').value='';
+  document.getElementById('e-pw2').value='';
+  showToast('تم تحديث كلمة المرور');
+}
+
+// ===== SCAN =====
+function switchScan(doc, method, btn){
+  var card=document.getElementById(doc+'-card');
+  card.querySelectorAll('.smethod').forEach(function(b){b.classList.remove('active')});
+  btn.classList.add('active');
+  card.querySelectorAll('.scan-view').forEach(function(v){v.classList.remove('active')});
+  document.getElementById(doc+'-'+method).classList.add('active');
+}
+
+function dragOver(e,el){e.preventDefault();el.classList.add('drag-over')}
+function dragLeave(el){el.classList.remove('drag-over')}
+
+function dropFile(e,doc){
+  e.preventDefault();
+  document.getElementById(doc+'-zone').classList.remove('drag-over');
+  var file=e.dataTransfer.files[0];
+  if(file) loadPreview(file,doc);
+}
+
+function previewFile(input,doc){
+  if(input.files[0]) loadPreview(input.files[0],doc);
+}
+
+function loadPreview(file,doc){
+  if(file.size>5*1024*1024){showToast('حجم الملف كبير جداً (أقصى 5MB)','err');return;}
+  var reader=new FileReader();
+  reader.onload=function(e){
+    document.getElementById(doc+'-img').src=e.target.result;
+    document.getElementById(doc+'-preview').style.display='block';
+    var st=document.getElementById(doc+'-status');
+    st.textContent='✓ تم تحميل الصورة — أكمل البيانات ثم احفظ';
+    st.className='doc-status ok';st.style.display='block';
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearFile(doc){
+  document.getElementById(doc+'-img').src='';
+  document.getElementById(doc+'-preview').style.display='none';
+  document.getElementById(doc+'-file').value='';
+  document.getElementById(doc+'-status').style.display='none';
+}
+
+function saveDoc(doc){
+  var img=document.getElementById(doc+'-img').src;
+  var num=document.getElementById(doc+'-num').value;
+  var exp=document.getElementById(doc+'-exp').value;
+  var docs=JSON.parse(localStorage.getItem('ordo_docs_'+currentUser.nin)||'{}');
+  docs[doc]={img:img.length>50?'[صورة محفوظة]':img,num:num,exp:exp,savedAt:new Date().toLocaleDateString('ar-DZ')};
+  localStorage.setItem('ordo_docs_'+currentUser.nin,JSON.stringify(docs));
+  showToast('تم حفظ الوثيقة بنجاح');
+  document.getElementById(doc+'-status').textContent='✓ تم الحفظ بتاريخ '+new Date().toLocaleDateString('ar-DZ');
+  document.getElementById(doc+'-status').className='doc-status ok';
+}
+
+// CAMERA
+var streams={};
+function openCamera(doc){
+  var vid=document.getElementById(doc+'-cam');
+  var acts=document.getElementById(doc+'-cam-actions');
+  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}}).then(function(stream){
+    streams[doc]=stream;
+    vid.srcObject=stream;
+    vid.style.display='block';
+    if(acts)acts.style.display='flex';
+  }).catch(function(){showToast('تعذر الوصول إلى الكاميرا','err');});
+}
+
+function capturePhoto(doc){
+  var vid=document.getElementById(doc+'-cam');
+  var canvas=document.getElementById(doc+'-canvas');
+  canvas.width=vid.videoWidth;canvas.height=vid.videoHeight;
+  canvas.getContext('2d').drawImage(vid,0,0);
+  var dataUrl=canvas.toDataURL('image/jpeg');
+  document.getElementById(doc+'-img').src=dataUrl;
+  document.getElementById(doc+'-preview').style.display='block';
+  stopCamera(doc);
+  var st=document.getElementById(doc+'-status');
+  st.textContent='✓ تم التقاط الصورة — أكمل البيانات ثم احفظ';
+  st.className='doc-status ok';st.style.display='block';
+}
+
+function stopCamera(doc){
+  if(streams[doc]){streams[doc].getTracks().forEach(function(t){t.stop()});delete streams[doc];}
+  var vid=document.getElementById(doc+'-cam');
+  if(vid){vid.style.display='none';}
+  var acts=document.getElementById(doc+'-cam-actions');
+  if(acts)acts.style.display='none';
+}
+
+// MULTI FILE UPLOAD
+function dropMulti(e){
+  e.preventDefault();
+  document.querySelector('.scan-card.full .scan-zone').classList.remove('drag-over');
+  renderMulti(e.dataTransfer.files);
+}
+function previewMulti(input){renderMulti(input.files);}
+function renderMulti(files){
+  var grid=document.getElementById('pc-preview-grid');
+  Array.from(files).forEach(function(file){
+    if(file.type.startsWith('image/')){
+      var reader=new FileReader();
+      reader.onload=function(e){
+        var div=document.createElement('div');
+        div.style.cssText='position:relative;border-radius:10px;overflow:hidden;border:1px solid var(--border)';
+        div.innerHTML='<img src="'+e.target.result+'" style="width:100%;height:110px;object-fit:cover;display:block"><div style="padding:0.5rem;background:var(--white);font-size:0.7rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+file.name+'</div>';
+        grid.appendChild(div);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      var div=document.createElement('div');
+      div.style.cssText='border:1px solid var(--border);border-radius:10px;padding:1rem;text-align:center;background:var(--off)';
+      div.innerHTML='<i class="fas fa-file-pdf" style="font-size:2rem;color:var(--red);margin-bottom:0.5rem;display:block"></i><span style="font-size:0.72rem;color:var(--muted)">'+file.name+'</span>';
+      grid.appendChild(div);
+    }
+  });
+  showToast('تم تحميل '+files.length+' ملف');
+}
+
+// TOAST
+function showToast(msg, type){
+  var t=document.getElementById('toast');
+  document.getElementById('toast-msg').textContent=msg;
+  t.style.background=type==='err'?'var(--red)':'var(--green)';
+  t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show')},3000);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ORDO · منصة الحجوزات الذكية الجزائرية</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="topnav">
+    <div class="topnav-inner">
+        <div class="nav-brand">
+            <img src="logo/logo.png" alt="ORDO Logo" class="nav-img-logo">
+            <span class="nav-logo">ORDO</span>
+            <span class="nav-divider"></span>
+            <span class="nav-tagline">الجمهورية الجزائرية الديمقراطية الشعبية</span>
+        </div>
+        <div class="nav-links">
+            <a href="#services">الخدمات</a>
+                        <a href="auth.html">تسجيل دخول</a>
+                                                <a href="dashboard.html"> قسم المعلومات</a>
+                                                                                                <a href="appointments.html"> استخراج و طلبات </a>
+
+                                                                                                <a href="facility.html"> ادارة المرافق </a>
+            <a href="about.html">حولنا</a>
+
+
+        </div>
+    </div>
+</nav>
+
+    <header class="hero">
+        <div class="hero-bg">
+            <div class="hero-stripe green"></div>
+            <div class="hero-stripe white"></div>
+            <div class="hero-crescent">
+                <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M100 20 A80 80 0 1 1 99.9 20" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="2"/>
+                    <path d="M100 40 A60 60 0 1 1 99.9 40" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="1.5"/>
+                    <path d="M100 60 A40 40 0 1 1 99.9 60" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+                </svg>
+            </div>
+        </div>
+        <div class="hero-content">
+            <div class="hero-badge">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/7/77/Flag_of_Algeria.svg" alt="علم الجزائر" class="flag-small">
+                <span>الجمهورية الجزائرية الديمقراطية الشعبية</span>
+            </div>
+            <h1 class="hero-title">
+                <span class="title-ordo">ORDO</span>
+                <span class="title-dot">·</span>
+                <span class="title-ar">أوردو</span>
+            </h1>
+            <p class="hero-sub">منصة رقمية ذكية لتنظيم وحجز المواعيد الإدارية في الجزائر</p>
+            <div class="hero-divider"></div>
+            <p class="hero-desc">نهاية الانتظار — بدء الكفاءة</p>
+            <div class="hero-actions">
+                <button class="btn-primary" id="citizen-btn">
+                    <i class="fas fa-user-circle"></i>
+                    دخول المواطن
+                </button>
+                <button class="btn-secondary" id="national-btn">
+                    <i class="fas fa-landmark"></i>
+                    بوابة المؤسسات
+                </button>
+            </div>
+        </div>
+        <div class="hero-scroll">
+            <span>اكتشف المنصة</span>
+            <i class="fas fa-chevron-down"></i>
+        </div>
+    </header>
+
+    <section class="about-strip">
+        <div class="strip-inner">
+            <div class="strip-item">
+                <i class="fas fa-shield-halved"></i>
+                <span>منصة حكومية موثوقة</span>
+            </div>
+            <div class="strip-sep"></div>
+            <div class="strip-item">
+                <i class="fas fa-bolt"></i>
+                <span>حجز فوري ومباشر</span>
+            </div>
+            <div class="strip-sep"></div>
+            <div class="strip-item">
+                <i class="fas fa-location-dot"></i>
+                <span>تغطية 58 ولاية</span>
+            </div>
+            <div class="strip-sep"></div>
+            <div class="strip-item">
+                <i class="fas fa-bell"></i>
+                <span>تذكيرات أوتوماتيكية</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="info-section">
+        <div class="section-header">
+            <span class="section-label">عن المنصة</span>
+            <h2 class="section-title">لماذا ORDO؟</h2>
+        </div>
+        <div class="cards-grid">
+            <div class="card" data-delay="0">
+                <div class="card-icon"><i class="fas fa-lightbulb"></i></div>
+                <div class="card-body">
+                    <h3>فكرة المشروع</h3>
+                    <p>ORDO هي أول منصة جزائرية ذكية تربط المواطنين بالمؤسسات الخدمية عبر نظام حجز إلكتروني متطور ينهي مشكلة الانتظار الطويل أمام الإدارات.</p>
+                </div>
+            </div>
+            <div class="card" data-delay="100">
+                <div class="card-icon"><i class="fas fa-map-marked-alt"></i></div>
+                <div class="card-body">
+                    <h3>تغطية وطنية شاملة</h3>
+                    <p>تغطي المنصة جميع بلديات الجزائر مع تحديد دقيق للموقع عبر GPS. ابحث عن أقرب مصلحة واحجز موعدك بضغطة زر واحدة.</p>
+                </div>
+            </div>
+            <div class="card" data-delay="200">
+                <div class="card-icon"><i class="fas fa-chart-line"></i></div>
+                <div class="card-body">
+                    <h3>فوائد المنصة</h3>
+                    <p>توفير الوقت وتقليل الازدحام وشفافية المواعيد مع تذكيرات أوتوماتيكية وإحصائيات دقيقة للمؤسسات والمواطنين على حد سواء.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="services" id="services">
+        <div class="section-header light">
+            <span class="section-label">ما نقدمه</span>
+            <h2 class="section-title">خدمات الحجوزات</h2>
+        </div>
+        <div class="services-grid">
+            <div class="service-card">
+                <div class="svc-icon"><i class="fas fa-passport"></i></div>
+                <h4>جوازات السفر</h4>
+                <p>حجز موعد استخراج وتجديد الجواز</p>
+                <span class="svc-badge">متاح</span>
+            </div>
+            <div class="service-card">
+                <div class="svc-icon"><i class="fas fa-id-card"></i></div>
+                <h4>بطاقة التعريف</h4>
+                <p>طلب وتجديد بطاقة الهوية الوطنية</p>
+                <span class="svc-badge">متاح</span>
+            </div>
+            <div class="service-card">
+                <div class="svc-icon"><i class="fas fa-car"></i></div>
+                <h4>رخصة السياقة</h4>
+                <p>استخراج وتجديد رخصة القيادة</p>
+                <span class="svc-badge">متاح</span>
+            </div>
+            <div class="service-card">
+                <div class="svc-icon"><i class="fas fa-hospital"></i></div>
+                <h4>المواعيد الطبية</h4>
+                <p>حجز مواعيد في العيادات والمستشفيات</p>
+                <span class="svc-badge">متاح</span>
+            </div>
+            <div class="service-card">
+                <div class="svc-icon"><i class="fas fa-gavel"></i></div>
+                <h4>العدالة</h4>
+                <p>مواعيد المحاكم والخدمات القضائية</p>
+                <span class="svc-badge">قريباً</span>
+            </div>
+            <div class="service-card">
+                <div class="svc-icon"><i class="fas fa-school"></i></div>
+                <h4>التسجيل المدرسي</h4>
+                <p>تسجيل الأبناء في المؤسسات التعليمية</p>
+                <span class="svc-badge">قريباً</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="map-section" id="map-section">
+        <div class="section-header">
+            <span class="section-label">الموقع الجغرافي</span>
+            <h2 class="section-title">حدد موقعك على الخريطة</h2>
+            <p class="section-desc">اضغط على الزر لتحديد موقعك عبر GPS، ستظهر بلديتك وأقرب المصالح المتوفرة في ORDO.</p>
+        </div>
+        <div class="map-wrapper">
+            <div id="map"></div>
+            <div class="map-panel">
+                <button id="locate-btn" class="locate-btn">
+                    <i class="fas fa-location-crosshairs"></i>
+                    <span>تحديد موقعي</span>
+                </button>
+                <div id="location-status" class="location-status"></div>
+                <div class="map-info">
+                    <div class="map-info-item">
+                        <i class="fas fa-circle-info"></i>
+                        <span>سيتم عرض أقرب البلديات والمصالح بعد تحديد موقعك</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="municipalities" id="municipalities">
+        <div class="section-header">
+            <span class="section-label">البلديات المتاحة</span>
+            <h2 class="section-title">بلديات على المنصة</h2>
+        </div>
+        <div class="municipality-grid">
+            <div class="muni-card" data-lat="36.7538" data-lng="3.0588">
+                <div class="muni-icon"><i class="fas fa-city"></i></div>
+                <h4>بلدية الجزائر الوسطى</h4>
+                <p>ولاية الجزائر</p>
+                <span class="muni-status active">نشط</span>
+            </div>
+            <div class="muni-card" data-lat="35.6972" data-lng="-0.6337">
+                <div class="muni-icon"><i class="fas fa-city"></i></div>
+                <h4>بلدية وهران</h4>
+                <p>ولاية وهران</p>
+                <span class="muni-status active">نشط</span>
+            </div>
+            <div class="muni-card" data-lat="36.3650" data-lng="6.6147">
+                <div class="muni-icon"><i class="fas fa-city"></i></div>
+                <h4>بلدية قسنطينة</h4>
+                <p>ولاية قسنطينة</p>
+                <span class="muni-status active">نشط</span>
+            </div>
+            <div class="muni-card" data-lat="36.9000" data-lng="7.7667">
+                <div class="muni-icon"><i class="fas fa-city"></i></div>
+                <h4>بلدية عنابة</h4>
+                <p>ولاية عنابة</p>
+                <span class="muni-status active">نشط</span>
+            </div>
+            <div class="muni-card" data-lat="36.1898" data-lng="5.4136">
+                <div class="muni-icon"><i class="fas fa-city"></i></div>
+                <h4>بلدية سطيف</h4>
+                <p>ولاية سطيف</p>
+                <span class="muni-status active">نشط</span>
+            </div>
+            <div class="muni-card" data-lat="36.7169" data-lng="4.0497">
+                <div class="muni-icon"><i class="fas fa-city"></i></div>
+                <h4>بلدية تيزي وزو</h4>
+                <p>ولاية تيزي وزو</p>
+                <span class="muni-status active">نشط</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="stats-section" id="stats">
+        <div class="stats-bg-text">ORDO</div>
+        <div class="stats-inner">
+            <div class="section-header light">
+                <span class="section-label">نطاق التغطية</span>
+                <h2 class="section-title">المنصة بالأرقام</h2>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <i class="fas fa-map-location-dot"></i>
+                    <div class="stat-num" data-target="58">0</div>
+                    <div class="stat-unit">ولاية</div>
+                </div>
+                <div class="stat-box">
+                    <i class="fas fa-layer-group"></i>
+                    <div class="stat-num" data-target="1541">0</div>
+                    <div class="stat-unit">بلدية</div>
+                </div>
+                    <div class="stat-box">
+                    <i class="fas fa-users"></i>
+                    <div class="stat-num" data-target="553 ">0</div>
+                    <div class="stat-unit">دائرة </div>
+                </div>
+                <div class="stat-box">
+                    <i class="fas fa-users"></i>
+                    <div class="stat-num" data-target="45">0</div>
+                    <div class="stat-unit">مليون+ مواطن</div>
+                </div>
+                <div class="stat-box">
+                    <i class="fas fa-calendar-check"></i>
+                    <div class="stat-num" data-target="3">0</div>
+                    <div class="stat-unit">خدمات متاحة</div>
+                </div>
+                
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-inner">
+            <div class="footer-brand">
+                <span class="footer-logo">ORDO</span>
+                <p>منصة الحجوزات الذكية الجزائرية</p>
+            </div>
+            <div class="footer-sep"></div>
+            <div class="footer-info">
+                <p>© 2025 ORDO — جميع الحقوق محفوظة</p>
+                <p>الجمهورية الجزائرية الديمقراطية الشعبية</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

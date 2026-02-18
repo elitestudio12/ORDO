@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ORDO · تسجيل الدخول</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--g:#1b5e42;--gl:#236b50;--gd:#133d2c;--accent:#c8a84b;--w:#fff;--off:#f4f6f5;--text:#1a2a22;--muted:#5a7066;--b:#dde6e2;--red:#c62828}
+html,body{min-height:100vh;font-family:'Cairo','Tajawal',sans-serif;direction:rtl;background:var(--off);color:var(--text)}
+.wrap{min-height:100vh;display:grid;grid-template-columns:1fr 500px}
+.left{background:linear-gradient(160deg,var(--gd),var(--g));position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:center;padding:4rem 3rem}
+.left-geo{position:absolute;inset:0;pointer-events:none}
+.gc{position:absolute;border-radius:50%;border:1px solid rgba(255,255,255,0.06)}
+.gc:nth-child(1){width:500px;height:500px;top:-100px;left:-150px}
+.gc:nth-child(2){width:300px;height:300px;top:150px;left:-50px}
+.gc:nth-child(3){width:150px;height:150px;bottom:80px;right:40px}
+.left-brand{display:flex;align-items:center;gap:1rem;margin-bottom:3rem}
+.left-logo{font-family:'Tajawal',sans-serif;font-size:2rem;font-weight:800;color:var(--w);letter-spacing:4px}
+.left-flag{width:28px;height:18px;border-radius:3px;object-fit:cover}
+.left-h{font-family:'Tajawal',sans-serif;font-size:clamp(1.8rem,3vw,2.6rem);font-weight:800;color:var(--w);line-height:1.2;margin-bottom:1rem}
+.left-h span{color:var(--accent)}
+.left-p{font-size:.88rem;color:rgba(255,255,255,0.6);line-height:1.9;font-weight:300;max-width:380px;margin-bottom:2.5rem}
+.feats{display:flex;flex-direction:column;gap:.9rem}
+.feat{display:flex;align-items:center;gap:.9rem;font-size:.82rem;color:rgba(255,255,255,0.75)}
+.feat i{width:34px;height:34px;background:rgba(255,255,255,0.08);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:.88rem;flex-shrink:0}
+.left-foot{position:absolute;bottom:1.8rem;left:3rem;font-size:.72rem;color:rgba(255,255,255,0.28)}
+.right{background:var(--w);overflow-y:auto;display:flex;flex-direction:column}
+.ri{padding:2.5rem 2rem;flex:1;display:flex;flex-direction:column;max-width:460px;margin:0 auto;width:100%}
+.mode-sel{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-bottom:1.8rem}
+.mbtn{padding:1rem;border:2px solid var(--b);border-radius:12px;background:var(--w);cursor:pointer;text-align:center;transition:all .2s;font-family:'Cairo',sans-serif}
+.mbtn i{display:block;font-size:1.5rem;color:var(--muted);margin-bottom:.4rem;transition:color .2s}
+.mbtn b{display:block;font-size:.78rem;font-weight:700;color:var(--muted)}
+.mbtn small{display:block;font-size:.65rem;color:#9ab;margin-top:.15rem}
+.mbtn.act{border-color:var(--g);background:rgba(27,94,66,0.05)}
+.mbtn.act i,.mbtn.act b{color:var(--g)}
+.tabs{display:flex;border-bottom:2px solid var(--b);margin-bottom:1.8rem}
+.tab{flex:1;padding:.8rem;background:none;border:none;font-family:'Cairo',sans-serif;font-size:.85rem;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:2.5px solid transparent;margin-bottom:-2px;transition:all .2s}
+.tab.act{color:var(--g);border-bottom-color:var(--g)}
+.scr{display:none}.scr.act{display:block}
+.sc-h{font-family:'Tajawal',sans-serif;font-size:1.55rem;font-weight:800;color:var(--text);margin-bottom:.25rem}
+.sc-p{font-size:.79rem;color:var(--muted);margin-bottom:1.4rem;line-height:1.7}
+.info-b{display:flex;gap:.6rem;background:rgba(27,94,66,0.06);border:1px solid rgba(27,94,66,0.14);border-radius:9px;padding:.8rem;margin-bottom:1.2rem;font-size:.77rem;color:var(--g);line-height:1.7}
+.info-b i{flex-shrink:0;margin-top:2px}
+.fg{margin-bottom:.95rem;position:relative}
+.fg label{display:block;font-size:.73rem;font-weight:700;color:var(--text);margin-bottom:.35rem}
+.req{color:var(--red);margin-right:2px}
+.fi{position:relative}
+.fi .field{padding-right:2.6rem}
+.fi .ico{position:absolute;right:.85rem;top:50%;transform:translateY(-50%);color:var(--muted);font-size:.82rem;pointer-events:none}
+.fi .tpw{position:absolute;left:.85rem;top:50%;transform:translateY(-50%);color:var(--muted);font-size:.8rem;cursor:pointer}
+.field{width:100%;padding:.75rem .9rem;border:1.5px solid var(--b);border-radius:10px;font-family:'Cairo',sans-serif;font-size:.84rem;color:var(--text);background:var(--w);outline:none;transition:all .2s;appearance:none;-webkit-appearance:none}
+.field:focus{border-color:var(--g);box-shadow:0 0 0 3px rgba(27,94,66,0.07)}
+.field.er{border-color:var(--red);box-shadow:0 0 0 3px rgba(198,40,40,0.06)}
+.field::placeholder{color:#b5c9c2;font-weight:300}
+.errmsg{display:none;font-size:.69rem;color:var(--red);margin-top:.28rem;font-weight:500}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:.85rem}
+.pw-bw{height:3px;background:var(--b);border-radius:2px;margin-top:.38rem;overflow:hidden}
+.pw-b{height:100%;width:0;border-radius:2px;transition:all .3s}
+.pw-h{font-size:.67rem;color:var(--muted);margin-top:.22rem}
+.steps{display:flex;align-items:center;margin-bottom:1.3rem}
+.sd{width:27px;height:27px;border-radius:50%;border:2px solid var(--b);display:flex;align-items:center;justify-content:center;font-size:.67rem;font-weight:700;color:var(--muted);flex-shrink:0;transition:all .25s}
+.sd.act{border-color:var(--g);color:var(--g)}
+.sd.done{background:var(--g);border-color:var(--g);color:var(--w)}
+.sl{flex:1;height:2px;background:var(--b);transition:background .25s}
+.sl.done{background:var(--g)}
+.slbs{display:flex;justify-content:space-between;margin-bottom:1.2rem}
+.slb{font-size:.62rem;color:var(--muted);flex:1;text-align:center}
+.slb.act{color:var(--g);font-weight:700}
+.tsl{font-size:.64rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:.22rem .55rem;border-radius:5px;display:inline-block;margin:.7rem 0 .35rem}
+.tsl.pub{background:rgba(27,94,66,0.1);color:var(--g)}
+.tsl.priv{background:rgba(200,168,75,0.12);color:var(--accent)}
+.tsl.cit{background:rgba(33,150,243,0.1);color:#1565c0}
+.tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:.45rem}
+.tc{padding:.65rem .35rem;border:1.5px solid var(--b);border-radius:9px;cursor:pointer;text-align:center;transition:all .18s;position:relative}
+.tc:hover{border-color:var(--g);background:rgba(27,94,66,0.03)}
+.tc.sel{border-color:var(--g);background:rgba(27,94,66,0.06)}
+.tc.sel::after{content:'\f00c';font-family:'Font Awesome 6 Free';font-weight:900;position:absolute;top:4px;left:5px;font-size:.52rem;color:var(--g)}
+.tc i{display:block;font-size:1rem;color:var(--g);margin-bottom:.3rem}
+.tc span{font-size:.68rem;font-weight:700;color:var(--text)}
+.tc-cit{grid-column:span 3;display:flex;align-items:center;gap:.7rem;text-align:right;padding:.75rem .9rem}
+.tc-cit i{font-size:1.3rem;margin:0;flex-shrink:0}
+.tc-cit .tct strong{display:block;font-size:.8rem;font-weight:700}
+.tc-cit .tct small{font-size:.66rem;color:var(--muted);font-weight:400}
+.rstep{display:none}.rstep.act{display:block}
+.btn{display:flex;align-items:center;justify-content:center;gap:.55rem;width:100%;padding:.85rem;background:var(--g);color:var(--w);border:none;border-radius:10px;font-family:'Cairo',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;transition:all .25s;margin-top:.3rem}
+.btn:hover{background:var(--gd);transform:translateY(-2px);box-shadow:0 5px 16px rgba(27,94,66,.2)}
+.btn.out{background:transparent;color:var(--g);border:1.5px solid var(--g)}
+.btn.out:hover{background:rgba(27,94,66,0.04);transform:translateY(-2px)}
+.sum-b{background:var(--off);border:1px solid var(--b);border-radius:9px;padding:.8rem 1rem;margin-bottom:.9rem;font-size:.76rem;line-height:2;color:var(--muted)}
+.sum-b strong{color:var(--text)}
+.sbox{text-align:center;padding:2rem 1rem}
+.si{width:68px;height:68px;background:rgba(27,94,66,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.1rem;font-size:1.7rem;color:var(--g)}
+.sbox h3{font-family:'Tajawal',sans-serif;font-size:1.25rem;font-weight:800;margin-bottom:.45rem}
+.sbox p{font-size:.8rem;color:var(--muted);line-height:1.8;margin-bottom:1.2rem}
+.or-d{display:flex;align-items:center;gap:.7rem;margin:.9rem 0;color:var(--muted);font-size:.73rem}
+.or-d::before,.or-d::after{content:'';flex:1;height:1px;background:var(--b)}
+@media(max-width:860px){.wrap{grid-template-columns:1fr}.left{display:none}.right{min-height:100vh}}
+@media(max-width:480px){.ri{padding:1.6rem 1.1rem}.frow{grid-template-columns:1fr}.tgrid{grid-template-columns:repeat(2,1fr)}.tc-cit{grid-column:span 2}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="left">
+  <div class="left-geo"><div class="gc"></div><div class="gc"></div><div class="gc"></div></div>
+  <div class="left-brand">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/7/77/Flag_of_Algeria.svg" class="left-flag" alt="">
+    <span class="left-logo">ORDO</span>
+  </div>
+  <h1 class="left-h">بوابتك الرقمية<br>للخدمات <span>الجزائرية</span></h1>
+  <p class="left-p">منصة ORDO تربط المواطن بالمرافق العامة والخاصة لحجز مواعيده الإدارية إلكترونياً دون انتظار.</p>
+  <div class="feats">
+    <div class="feat"><i class="fas fa-shield-halved"></i>منصة حكومية آمنة ومعتمدة</div>
+    <div class="feat"><i class="fas fa-bolt"></i>حجز فوري — بدون انتظار</div>
+    <div class="feat"><i class="fas fa-map-location-dot"></i>تغطية 58 ولاية جزائرية</div>
+    <div class="feat"><i class="fas fa-bell"></i>تذكيرات أوتوماتيكية بموعدك</div>
+  </div>
+  <div class="left-foot">© 2025 ORDO — الجمهورية الجزائرية الديمقراطية الشعبية</div>
+</div>
+
+<div class="right">
+<div class="ri">
+  <div style="text-align:center;margin-bottom:1.5rem">
+    <div style="font-family:'Tajawal',sans-serif;font-size:1.35rem;font-weight:800;color:var(--text);margin-bottom:.25rem">مرحباً بك في ORDO</div>
+    <div style="font-size:.76rem;color:var(--muted)">اختر نوع حسابك للمتابعة</div>
+  </div>
+
+  <div class="mode-sel">
+    <div class="mbtn act" id="mb-c" onclick="setMode('citizen')">
+      <i class="fas fa-user"></i><b>مواطن</b><small>حجز مواعيد إدارية</small>
+    </div>
+    <div class="mbtn" id="mb-f" onclick="setMode('facility')">
+      <i class="fas fa-building-columns"></i><b>مرفق / مؤسسة</b><small>إدارة المواعيد الواردة</small>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab act" id="tl" onclick="switchTab('login')">تسجيل الدخول</button>
+    <button class="tab" id="tr" onclick="switchTab('register')">إنشاء حساب</button>
+  </div>
+
+  <!-- LOGIN -->
+  <div class="scr act" id="scr-login">
+    <div id="lc">
+      <div class="sc-h">أهلاً بعودتك</div>
+      <p class="sc-p">سجّل دخولك برقم التعريف الوطني (NIN)</p>
+      <div class="info-b"><i class="fas fa-circle-info"></i><span>رقم التعريف الوطني هو مفتاح حسابك الوحيد على المنصة</span></div>
+      <div class="fg">
+        <label>رقم التعريف الوطني <span class="req">*</span></label>
+        <div class="fi"><i class="ico fas fa-id-card"></i><input class="field" id="ln-nin" type="text" placeholder="18 رقماً" maxlength="18" oninput="onlyN(this)"></div>
+        <div class="errmsg" id="ln-nin-e">أدخل رقم تعريف وطني صحيح (18 رقماً)</div>
+      </div>
+      <div class="fg">
+        <label>كلمة المرور <span class="req">*</span></label>
+        <div class="fi"><i class="ico fas fa-lock"></i><input class="field" id="ln-pw" type="password" placeholder="••••••••"><i class="tpw fas fa-eye" onclick="tpw('ln-pw',this)"></i></div>
+        <div class="errmsg" id="ln-pw-e">كلمة المرور غير صحيحة</div>
+      </div>
+      <div style="text-align:left;margin:.2rem 0 .7rem"><a href="#" style="font-size:.73rem;color:var(--g);text-decoration:none;font-weight:600">نسيت كلمة المرور؟</a></div>
+      <button class="btn" onclick="loginC()"><i class="fas fa-arrow-left"></i>دخول</button>
+      <div class="or-d">أو</div>
+      <button class="btn out" onclick="switchTab('register')">إنشاء حساب جديد</button>
+    </div>
+    <div id="lf" style="display:none">
+      <div class="sc-h">بوابة المرافق</div>
+      <p class="sc-p">سجّل دخولك ببريدك الإلكتروني الرسمي</p>
+      <div class="fg">
+        <label>البريد الإلكتروني الرسمي <span class="req">*</span></label>
+        <div class="fi"><i class="ico fas fa-envelope"></i><input class="field" id="lf-em" type="email" placeholder="facility@wilaya.dz"></div>
+        <div class="errmsg" id="lf-em-e">البريد أو كلمة المرور غير صحيحة</div>
+      </div>
+      <div class="fg">
+        <label>كلمة المرور <span class="req">*</span></label>
+        <div class="fi"><i class="ico fas fa-lock"></i><input class="field" id="lf-pw" type="password" placeholder="••••••••"><i class="tpw fas fa-eye" onclick="tpw('lf-pw',this)"></i></div>
+        <div class="errmsg" id="lf-pw-e">كلمة المرور غير صحيحة</div>
+      </div>
+      <button class="btn" onclick="loginF()"><i class="fas fa-arrow-left"></i>دخول كمرفق</button>
+      <div class="or-d">أو</div>
+      <button class="btn out" onclick="switchTab('register')">تسجيل مرفق جديد</button>
+    </div>
+  </div>
+
+  <!-- REGISTER -->
+  <div class="scr" id="scr-reg">
+    <!-- CITIZEN REG -->
+    <div id="rc">
+      <div class="sc-h">إنشاء حساب مواطن</div>
+      <p class="sc-p">3 خطوات بسيطة لإنشاء حسابك</p>
+      <div class="steps">
+        <div class="sd act" id="cd1">1</div><div class="sl" id="cl1"></div>
+        <div class="sd" id="cd2">2</div><div class="sl" id="cl2"></div>
+        <div class="sd" id="cd3">3</div>
+      </div>
+      <div class="slbs">
+        <span class="slb act" id="cs1">نوع الحساب</span>
+        <span class="slb" id="cs2">المعلومات</span>
+        <span class="slb" id="cs3">كلمة المرور</span>
+      </div>
+
+      <!-- s1 — citizen only -->
+      <div class="rstep act" id="cst1">
+        <div style="text-align:center;padding:1.2rem 0 1rem">
+          <div style="width:68px;height:68px;border-radius:50%;background:rgba(27,94,66,0.08);display:flex;align-items:center;justify-content:center;margin:0 auto .9rem;font-size:1.8rem;color:var(--g)"><i class="fas fa-user"></i></div>
+          <div style="font-family:'Tajawal',sans-serif;font-size:1.1rem;font-weight:800;color:var(--text);margin-bottom:.4rem">حساب مواطن</div>
+          <div style="font-size:.78rem;color:var(--muted);line-height:1.8">سيُنشأ حسابك كمواطن للاستفادة من خدمات الحجز الإلكتروني.<br>إذا كنت مرفقاً أو مؤسسة، اختر <strong style="color:var(--g)">مرفق / مؤسسة</strong> في الأعلى.</div>
+        </div>
+        <div style="background:rgba(27,94,66,0.06);border:1px solid rgba(27,94,66,0.14);border-radius:10px;padding:.85rem 1rem;margin:.8rem 0 1rem;font-size:.77rem;color:var(--g);display:flex;align-items:flex-start;gap:.65rem;line-height:1.7">
+          <i class="fas fa-circle-info" style="margin-top:2px;flex-shrink:0"></i>
+          <span>ستتمكن من حجز مواعيد في البلديات، الولايات، المحاكم، وجميع المرافق الجزائرية المتاحة في ولايتك</span>
+        </div>
+        <button class="btn" onclick="cType='مواطن';cSt(2)"><i class="fas fa-arrow-left"></i>المتابعة كمواطن</button>
+      </div>
+
+      <!-- s2 -->
+      <div class="rstep" id="cst2">
+        <div class="frow">
+          <div class="fg"><label>الاسم <span class="req">*</span></label><input class="field" id="c-fn" type="text" placeholder="الاسم"></div>
+          <div class="fg"><label>اللقب <span class="req">*</span></label><input class="field" id="c-ln" type="text" placeholder="اللقب"></div>
+        </div>
+        <div class="fg"><label>البريد الإلكتروني <span class="req">*</span></label>
+          <div class="fi"><i class="ico fas fa-envelope"></i><input class="field" id="c-em" type="email" placeholder="example@email.com"></div></div>
+        <div class="fg"><label>رقم الهاتف <span class="req">*</span></label>
+          <div class="fi"><i class="ico fas fa-phone"></i><input class="field" id="c-ph" type="tel" placeholder="05 XX XX XX XX"></div></div>
+        <div class="fg"><label>الولاية <span class="req">*</span></label>
+          <div class="fi"><i class="ico fas fa-map-location-dot"></i>
+          <select class="field" id="c-wil">
+            <option value="">-- اختر الولاية --</option>
+            <option>تيارت</option><option>الجزائر</option><option>وهران</option><option>قسنطينة</option>
+            <option>عنابة</option><option>سطيف</option><option>بجاية</option><option>تلمسان</option>
+            <option>بسكرة</option><option>ورقلة</option><option>المدية</option><option>البويرة</option>
+            <option>تيزي وزو</option><option>المسيلة</option><option>باتنة</option><option>سيدي بلعباس</option>
+            <option>مستغانم</option><option>معسكر</option><option>الأغواط</option><option>غليزان</option>
+            <option>الشلف</option><option>تبسة</option><option>خنشلة</option><option>سكيكدة</option>
+            <option>جيجل</option><option>أم البواقي</option><option>سوق أهراس</option><option>عين الدفلى</option>
+            <option>تيسمسيلت</option><option>برج بوعريريج</option><option>بومرداس</option><option>عين تموشنت</option>
+            <option>ميلة</option><option>غرداية</option><option>الوادي</option><option>تندوف</option>
+            <option>إليزي</option><option>تمنراست</option><option>أدرار</option><option>بشار</option>
+            <option>البيض</option><option>النعامة</option><option>الجلفة</option><option>تيبازة</option>
+            <option>الطارف</option><option>قالمة</option>
+          </select></div></div>
+        <div class="fg"><label>رقم التعريف الوطني (NIN) <span class="req">*</span></label>
+          <div class="fi"><i class="ico fas fa-id-card"></i><input class="field" id="c-nin" type="text" placeholder="18 رقماً" maxlength="18" oninput="onlyN(this)"></div>
+          <div class="errmsg" id="c-nin-e">يجب أن يتكون من 18 رقماً بالضبط</div></div>
+        <div class="frow">
+          <button class="btn out" onclick="cSt(1)"><i class="fas fa-arrow-right"></i>رجوع</button>
+          <button class="btn" style="margin-top:0" onclick="cSt(3)">التالي <i class="fas fa-arrow-left"></i></button>
+        </div>
+      </div>
+
+      <!-- s3 -->
+      <div class="rstep" id="cst3">
+        <div class="sum-b">نوع الحساب: <strong id="c-st">—</strong> | الولاية: <strong id="c-sw">—</strong></div>
+        <div class="fg"><label>كلمة المرور <span class="req">*</span></label>
+          <div class="fi"><i class="ico fas fa-lock"></i>
+            <input class="field" id="c-pw" type="password" placeholder="8 أحرف على الأقل" oninput="ckpw(this.value,'cpb','cph')">
+            <i class="tpw fas fa-eye" onclick="tpw('c-pw',this)"></i></div>
+          <div class="pw-bw"><div class="pw-b" id="cpb"></div></div>
+          <div class="pw-h" id="cph">أدخل كلمة مرور قوية</div></div>
+        <div class="fg"><label>تأكيد كلمة المرور <span class="req">*</span></label>
+          <div class="fi"><i class="ico fas fa-lock"></i>
+            <input class="field" id="c-pw2" type="password" placeholder="أعد الكتابة">
+            <i class="tpw fas fa-eye" onclick="tpw('c-pw2',this)"></i></div>
+          <div class="errmsg" id="c-pw2-e">كلمتا المرور غير متطابقتين</div></div>
+        <div class="frow">
+          <button class="btn out" onclick="cSt(2)"><i class="fas fa-arrow-right"></i>رجوع</button>
+          <button class="btn" style="margin-top:0" onclick="doRC()"><i class="fas fa-check"></i>إنشاء</button>
+        </div>
+      </div>
+
+      <!-- success -->
+      <div class="rstep" id="cst-ok">
+        <div class="sbox">
+          <div class="si"><i class="fas fa-circle-check"></i></div>
+          <h3>تم إنشاء حسابك!</h3>
+          <p>يمكنك الآن تسجيل الدخول برقم التعريف الوطني وكلمة المرور.</p>
+          <button class="btn" onclick="switchTab('login')"><i class="fas fa-arrow-left"></i>تسجيل الدخول</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- FACILITY REG -->
+    <div id="rf" style="display:none">
+      <div class="sc-h">تسجيل مرفق</div>
+      <p class="sc-p">أنشئ حساب مرفقك الرسمي على منصة ORDO</p>
+      <div class="fg"><label>نوع المرفق <span class="req">*</span></label>
+        <div class="fi"><i class="ico fas fa-building"></i>
+        <select class="field" id="f-tp">
+          <option value="">-- اختر نوع المرفق --</option>
+          <optgroup label="مرافق عامة">
+            <option>بلدية</option><option>ولاية</option><option>دائرة</option>
+            <option>سونلغاز</option><option>نسار</option><option>محكمة</option>
+          </optgroup>
+          <optgroup label="مرافق خاصة">
+            <option>موثق</option><option>محامي</option><option>محضر قضائي</option><option>مهندس معماري</option>
+          </optgroup>
+        </select></div>
+        <div class="errmsg" id="f-tp-e">اختر نوع المرفق</div></div>
+      <div class="fg"><label>اسم المرفق <span class="req">*</span></label>
+        <div class="fi"><i class="ico fas fa-landmark"></i><input class="field" id="f-nm" type="text" placeholder="مثال: بلدية تيارت المركز"></div>
+        <div class="errmsg" id="f-nm-e">أدخل اسم المرفق</div></div>
+      <div class="fg"><label>الولاية <span class="req">*</span></label>
+        <div class="fi"><i class="ico fas fa-map-location-dot"></i>
+        <select class="field" id="f-wil">
+          <option value="">-- اختر الولاية --</option>
+          <option>تيارت</option><option>الجزائر</option><option>وهران</option><option>قسنطينة</option>
+          <option>عنابة</option><option>سطيف</option><option>بجاية</option><option>تلمسان</option>
+          <option>بسكرة</option><option>ورقلة</option><option>المدية</option><option>البويرة</option>
+          <option>تيزي وزو</option><option>المسيلة</option><option>باتنة</option><option>سيدي بلعباس</option>
+          <option>مستغانم</option><option>معسكر</option><option>الأغواط</option><option>غليزان</option>
+          <option>الشلف</option><option>تبسة</option><option>خنشلة</option><option>سكيكدة</option>
+          <option>جيجل</option><option>أم البواقي</option><option>سوق أهراس</option><option>عين الدفلى</option>
+          <option>تيسمسيلت</option><option>برج بوعريريج</option><option>بومرداس</option><option>ميلة</option>
+          <option>غرداية</option><option>الوادي</option><option>إليزي</option><option>تمنراست</option>
+          <option>أدرار</option><option>بشار</option><option>البيض</option><option>النعامة</option>
+          <option>الجلفة</option><option>تيبازة</option><option>الطارف</option><option>قالمة</option>
+        </select></div>
+        <div class="errmsg" id="f-wil-e">اختر الولاية</div></div>
+      <div class="fg"><label>العنوان الكامل</label>
+        <div class="fi"><i class="ico fas fa-map-marker-alt"></i><input class="field" id="f-ad" type="text" placeholder="العنوان التفصيلي"></div></div>
+      <div class="fg"><label>رقم الهاتف الرسمي <span class="req">*</span></label>
+        <div class="fi"><i class="ico fas fa-phone"></i><input class="field" id="f-ph" type="tel" placeholder="04X XX XX XX"></div></div>
+      <div class="fg"><label>البريد الإلكتروني الرسمي <span class="req">*</span></label>
+        <div class="fi"><i class="ico fas fa-envelope"></i><input class="field" id="f-em" type="email" placeholder="facility@wilaya.dz"></div>
+        <div class="errmsg" id="f-em-e">بريد غير صحيح أو مسجّل مسبقاً</div></div>
+      <div class="fg"><label>ساعات العمل (الأحد – الخميس)</label>
+        <div class="frow" style="gap:.5rem">
+          <div class="fi"><i class="ico fas fa-clock"></i><input class="field" id="f-fr" type="time" value="08:00"></div>
+          <div class="fi"><i class="ico fas fa-clock"></i><input class="field" id="f-to" type="time" value="16:30"></div>
+        </div></div>
+      <div class="fg"><label>كلمة المرور <span class="req">*</span></label>
+        <div class="fi"><i class="ico fas fa-lock"></i>
+          <input class="field" id="f-pw" type="password" placeholder="8 أحرف على الأقل" oninput="ckpw(this.value,'fpb','fph')">
+          <i class="tpw fas fa-eye" onclick="tpw('f-pw',this)"></i></div>
+        <div class="pw-bw"><div class="pw-b" id="fpb"></div></div>
+        <div class="pw-h" id="fph">أدخل كلمة مرور قوية</div></div>
+      <div class="fg"><label>تأكيد كلمة المرور <span class="req">*</span></label>
+        <div class="fi"><i class="ico fas fa-lock"></i>
+          <input class="field" id="f-pw2" type="password" placeholder="أعد الكتابة">
+          <i class="tpw fas fa-eye" onclick="tpw('f-pw2',this)"></i></div>
+        <div class="errmsg" id="f-pw2-e">كلمتا المرور غير متطابقتين</div></div>
+      <button class="btn" onclick="doRF()"><i class="fas fa-check"></i>تسجيل المرفق</button>
+      <div class="or-d">أو</div>
+      <button class="btn out" onclick="switchTab('login')">لديّ حساب بالفعل</button>
+    </div>
+  </div><!-- /scr-reg -->
+
+</div></div><!-- /ri /right -->
+</div><!-- /wrap -->
+
+<script>
+var mode='citizen', cType='';
+function gv(id){return(document.getElementById(id)||{}).value||'';}
+function se(id){var e=document.getElementById(id);if(e)e.style.display='block';}
+function he(id){var e=document.getElementById(id);if(e)e.style.display='none';}
+function erf(id){var e=document.getElementById(id);if(e){e.classList.add('er');e.addEventListener('input',function(){this.classList.remove('er');},{once:true});}}
+function onlyN(el){el.value=el.value.replace(/\D/g,'');}
+function tpw(id,ico){var f=document.getElementById(id);if(!f)return;if(f.type==='password'){f.type='text';ico.classList.replace('fa-eye','fa-eye-slash');}else{f.type='password';ico.classList.replace('fa-eye-slash','fa-eye');}}
+function ckpw(v,bi,hi){
+  var s=0;if(v.length>=8)s++;if(/[A-Z]/.test(v))s++;if(/[0-9]/.test(v))s++;if(/[^A-Za-z0-9]/.test(v))s++;
+  var col=['','#ef5350','#ffa726','#66bb6a','#2e7d32'],lbl=['','ضعيفة','متوسطة','جيدة','قوية جداً'];
+  var b=document.getElementById(bi),h=document.getElementById(hi);
+  if(b){b.style.width=(s*25)+'%';b.style.background=col[s]||col[1];}
+  if(h){h.textContent=s?'قوة كلمة المرور: '+lbl[s]:'أدخل كلمة مرور قوية';h.style.color=col[s]||'';}
+}
+function toast(msg,type){
+  var t=document.getElementById('__t');
+  if(!t){t=document.createElement('div');t.id='__t';t.style.cssText='position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(100px);color:#fff;padding:.7rem 1.5rem;border-radius:50px;font-size:.79rem;font-weight:700;box-shadow:0 5px 18px rgba(0,0,0,.2);transition:transform .4s cubic-bezier(.34,1.56,.64,1);z-index:9999;display:flex;align-items:center;gap:.45rem;font-family:Cairo,sans-serif;white-space:nowrap';document.body.appendChild(t);}
+  t.style.background=type==='err'?'#c62828':'#1b5e42';
+  t.innerHTML=(type==='err'?'<i class="fas fa-circle-xmark"></i>':'<i class="fas fa-circle-check"></i>')+msg;
+  t.style.transform='translateX(-50%) translateY(0)';
+  clearTimeout(t._t);t._t=setTimeout(function(){t.style.transform='translateX(-50%) translateY(100px)';},3200);
+}
+
+function setMode(m){
+  mode=m;
+  document.getElementById('mb-c').classList.toggle('act',m==='citizen');
+  document.getElementById('mb-f').classList.toggle('act',m==='facility');
+  document.getElementById('lc').style.display=m==='citizen'?'block':'none';
+  document.getElementById('lf').style.display=m==='facility'?'block':'none';
+  document.getElementById('rc').style.display=m==='citizen'?'block':'none';
+  document.getElementById('rf').style.display=m==='facility'?'block':'none';
+}
+function switchTab(t){
+  document.getElementById('tl').classList.toggle('act',t==='login');
+  document.getElementById('tr').classList.toggle('act',t==='register');
+  document.getElementById('scr-login').classList.toggle('act',t==='login');
+  document.getElementById('scr-reg').classList.toggle('act',t==='register');
+}
+
+/* CITIZEN REG STEPS */
+function pickT(el,type){
+  document.querySelectorAll('#cst1 .tc').forEach(function(c){c.classList.remove('sel');});
+  el.classList.add('sel'); cType=type;
+}
+function cSt(n){
+  if(n===2){if(!cType){var e=document.getElementById('ct-e');e.style.display='block';e.style.opacity='1';return;}}
+  if(n===3){
+    var ok=true;
+    if(!gv('c-fn').trim()){erf('c-fn');ok=false;}
+    if(!gv('c-ln').trim()){erf('c-ln');ok=false;}
+    var em=gv('c-em');if(!em||!em.includes('@')){erf('c-em');ok=false;}
+    if(!gv('c-ph').trim()){erf('c-ph');ok=false;}
+    if(!gv('c-wil')){erf('c-wil');ok=false;}
+    if(gv('c-nin').length!==18){erf('c-nin');se('c-nin-e');ok=false;}
+    if(!ok){toast('يرجى تعبئة جميع الحقول المطلوبة','err');return;}
+    document.getElementById('c-st').textContent=cType;
+    document.getElementById('c-sw').textContent=gv('c-wil');
+  }
+  document.querySelectorAll('#rc .rstep').forEach(function(s){s.classList.remove('act');});
+  var id=typeof n==='string'?'cst-'+n:'cst'+n;
+  var el=document.getElementById(id);if(el)el.classList.add('act');
+  if(typeof n==='number')updCD(n);
+}
+function updCD(n){
+  for(var i=1;i<=3;i++){
+    var d=document.getElementById('cd'+i),s=document.getElementById('cs'+i);
+    d.className='sd';if(s)s.className='slb';
+    if(i<n){d.classList.add('done');d.innerHTML='<i class="fas fa-check" style="font-size:.52rem"></i>';}
+    else if(i===n){d.classList.add('act');d.textContent=i;if(s)s.classList.add('act');}
+    else{d.textContent=i;}
+    if(i<3){var l=document.getElementById('cl'+i);if(l)l.classList.toggle('done',i<n);}
+  }
+}
+function doRC(){
+  var pw=gv('c-pw'),pw2=gv('c-pw2');
+  if(pw.length<8){toast('كلمة المرور قصيرة جداً (8 أحرف على الأقل)','err');return;}
+  if(pw!==pw2){se('c-pw2-e');return;}
+  he('c-pw2-e');
+  var users=JSON.parse(localStorage.getItem('ordo_users')||'[]');
+  var nin=gv('c-nin');
+  if(users.find(function(u){return u.nin===nin&&u.role==='citizen';})){toast('رقم التعريف الوطني مسجّل مسبقاً','err');return;}
+  users.push({role:'citizen',type:cType,nin:nin,fname:gv('c-fn'),lname:gv('c-ln'),email:gv('c-em'),phone:gv('c-ph'),wilaya:gv('c-wil'),pw:pw,created:new Date().toLocaleDateString('ar-DZ')});
+  localStorage.setItem('ordo_users',JSON.stringify(users));
+  cSt('ok');
+}
+
+/* FACILITY REG */
+function doRF(){
+  var ok=true;
+  if(!gv('f-tp')){erf('f-tp');se('f-tp-e');ok=false;}
+  if(!gv('f-nm').trim()){erf('f-nm');se('f-nm-e');ok=false;}
+  if(!gv('f-wil')){erf('f-wil');se('f-wil-e');ok=false;}
+  if(!gv('f-ph').trim()){erf('f-ph');ok=false;}
+  var em=gv('f-em');if(!em||!em.includes('@')){erf('f-em');se('f-em-e');ok=false;}
+  var pw=gv('f-pw'),pw2=gv('f-pw2');
+  if(pw.length<8){toast('كلمة المرور قصيرة جداً','err');return;}
+  if(pw!==pw2){se('f-pw2-e');return;}
+  if(!ok){toast('يرجى تعبئة جميع الحقول المطلوبة','err');return;}
+  he('f-em-e');he('f-pw2-e');
+  var facs=JSON.parse(localStorage.getItem('ordo_facilities')||'[]');
+  if(facs.find(function(f){return f.email===em;})){se('f-em-e');toast('هذا البريد مسجّل بالفعل','err');return;}
+  facs.push({role:'facility',type:gv('f-tp'),name:gv('f-nm'),wilaya:gv('f-wil'),address:gv('f-ad'),phone:gv('f-ph'),email:em,from:gv('f-fr'),to:gv('f-to'),pw:pw,id:'FAC-'+Date.now(),created:new Date().toLocaleDateString('ar-DZ')});
+  localStorage.setItem('ordo_facilities',JSON.stringify(facs));
+  toast('تم تسجيل المرفق بنجاح!');
+  setTimeout(function(){switchTab('login');setMode('facility');},1500);
+}
+
+/* LOGIN */
+function loginC(){
+  var nin=gv('ln-nin'),pw=gv('ln-pw');
+  he('ln-nin-e');he('ln-pw-e');
+  document.getElementById('ln-nin').classList.remove('er');
+  document.getElementById('ln-pw').classList.remove('er');
+  if(nin.length!==18){document.getElementById('ln-nin').classList.add('er');se('ln-nin-e');return;}
+  if(!pw){document.getElementById('ln-pw').classList.add('er');return;}
+  var users=JSON.parse(localStorage.getItem('ordo_users')||'[]');
+  var u=users.find(function(x){return x.nin===nin&&x.pw===pw&&x.role==='citizen';});
+  if(!u){document.getElementById('ln-pw').classList.add('er');se('ln-pw-e');return;}
+  localStorage.setItem('ordo_current',JSON.stringify(u));
+  window.location.href='appointments.html';
+}
+function loginF(){
+  var em=gv('lf-em'),pw=gv('lf-pw');
+  he('lf-em-e');he('lf-pw-e');
+  document.getElementById('lf-em').classList.remove('er');
+  document.getElementById('lf-pw').classList.remove('er');
+  if(!em||!em.includes('@')){document.getElementById('lf-em').classList.add('er');se('lf-em-e');return;}
+  if(!pw){document.getElementById('lf-pw').classList.add('er');return;}
+  var facs=JSON.parse(localStorage.getItem('ordo_facilities')||'[]');
+  var f=facs.find(function(x){return x.email===em&&x.pw===pw;});
+  if(!f){document.getElementById('lf-em').classList.add('er');document.getElementById('lf-pw').classList.add('er');se('lf-em-e');return;}
+  localStorage.setItem('ordo_current',JSON.stringify(f));
+  window.location.href='facility.html';
+}
+</script>
+</body>
+</html>
