@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ORDO · لوحة إدارة المرفق</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -133,10 +134,75 @@ html,body{height:100%;font-family:'Cairo','Tajawal',sans-serif;direction:rtl;bac
 .sum-row .sk{color:var(--muted);font-size:.76rem}
 .sum-row .sv{font-weight:700}
 
+/* HAMBURGER + OVERLAY */
+.ham-btn{display:none;width:42px;height:42px;border-radius:10px;border:1.5px solid var(--b);background:var(--w);align-items:center;justify-content:center;cursor:pointer;color:var(--text);font-size:1.05rem;flex-shrink:0}
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:98;backdrop-filter:blur(2px)}
+
 /* RESPONSIVE */
 @media(max-width:960px){.stats-row{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:860px){.sb{display:none}.main{margin-right:0}}
-@media(max-width:580px){.stats-row{grid-template-columns:1fr 1fr}.content{padding:1rem}.frow{grid-template-columns:1fr}}
+
+@media(max-width:860px){
+  /* sidebar becomes a drawer */
+  .sb{transform:translateX(110%);transition:transform .28s cubic-bezier(.4,0,.2,1);box-shadow:none}
+  .sb.mob-open{transform:translateX(0);box-shadow:-6px 0 28px rgba(0,0,0,.35)}
+  .main{margin-right:0}
+  .ham-btn{display:flex!important}
+  .sb-overlay{display:none} /* controlled by JS */
+  .topbar{padding:0 1rem}
+  .tb-title{font-size:1rem}
+  .tb-wil{display:none}
+}
+
+@media(max-width:600px){
+  .stats-row{grid-template-columns:1fr 1fr}
+  .content{padding:1rem}
+  .frow{grid-template-columns:1fr}
+  /* inputs — prevent iOS auto-zoom */
+  .field{font-size:16px!important}
+  select.field{font-size:16px!important}
+  /* buttons — 44px tap target */
+  .save-btn{min-height:48px;width:100%;justify-content:center}
+  /* appointment table → scrollable */
+  .appt-table th:nth-child(4),.appt-table td:nth-child(4),
+  .appt-table th:nth-child(5),.appt-table td:nth-child(5){display:none}
+  .appt-table{font-size:.75rem}
+  .appt-table th,.appt-table td{padding:.55rem .5rem}
+  .ab{padding:.3rem .55rem;font-size:.65rem}
+  /* filter bar */
+  .filter-bar{gap:.35rem}
+  .fb{font-size:.68rem;padding:.4rem .6rem}
+  .search-input{width:100%;min-width:unset;margin-top:.3rem}
+  /* map */
+  #fac-map{height:260px}
+  .map-card-hdr{flex-direction:column;gap:.7rem;align-items:flex-start}
+  .map-card-hdr>div{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+  .map-card-hdr .save-btn{font-size:.75rem;padding:.5rem .8rem}
+  .map-coords{grid-template-columns:1fr 1fr}
+  .map-coords>.coord-box:last-child{grid-column:span 2}
+  /* hours */
+  .hours-grid{grid-template-columns:repeat(4,1fr)}
+  /* profile layout */
+  #page-profile > div[style]{display:block!important}
+  #page-profile > div > .card:first-child{margin-bottom:1rem}
+  /* modal */
+  .modal{padding:1.2rem;max-width:94vw}
+  /* card */
+  .card{padding:1.1rem}
+  .stat-num{font-size:1.6rem}
+  .topbar{height:52px}
+}
+
+/* MAP PAGE */
+#fac-map{height:420px;width:100%;border-radius:12px;z-index:1}
+.map-card{background:var(--w);border:1px solid var(--b);border-radius:14px;overflow:hidden;margin-bottom:1.2rem}
+.map-card-hdr{padding:1.1rem 1.5rem;border-bottom:1px solid var(--b);display:flex;align-items:center;justify-content:space-between}
+.map-card-hdr h3{font-family:'Tajawal',sans-serif;font-size:1rem;font-weight:800;color:var(--text);display:flex;align-items:center;gap:.5rem}
+.map-card-hdr h3 i{color:var(--g)}
+.map-coords{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.8rem;padding:1rem 1.5rem;border-top:1px solid var(--b)}
+.coord-box{background:var(--off);border:1px solid var(--b);border-radius:9px;padding:.7rem 1rem;font-size:.76rem}
+.coord-box .cb-lbl{color:var(--muted);margin-bottom:.2rem;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.coord-box .cb-val{font-weight:800;color:var(--g);font-family:'Tajawal',sans-serif;font-size:.95rem}
+.map-tip-bar{background:rgba(27,94,66,.06);border-bottom:1px solid rgba(27,94,66,.1);padding:.55rem 1.2rem;font-size:.75rem;color:var(--g);display:flex;align-items:center;gap:.5rem;font-weight:600}
 </style>
 </head>
 <body>
@@ -159,6 +225,7 @@ html,body{height:100%;font-family:'Cairo','Tajawal',sans-serif;direction:rtl;bac
     <a class="ni act" onclick="showPage('home',this)"><i class="fas fa-house"></i>لوحة التحكم</a>
     <a class="ni" onclick="showPage('appts',this)"><i class="fas fa-calendar-check"></i>إدارة المواعيد</a>
     <div class="ngl">الإعدادات</div>
+    <a class="ni" onclick="showPage('map',this)"><i class="fas fa-map-location-dot"></i>موقع المرفق</a>
     <a class="ni" onclick="showPage('profile',this)"><i class="fas fa-building"></i>معلومات المرفق</a>
     <a class="ni" onclick="showPage('hours',this)"><i class="fas fa-clock"></i>ساعات العمل</a>
   </div>
@@ -170,6 +237,7 @@ html,body{height:100%;font-family:'Cairo','Tajawal',sans-serif;direction:rtl;bac
 <!-- MAIN -->
 <div class="main">
   <div class="topbar">
+    <button class="ham-btn" onclick="toggleSidebar()" aria-label="فتح القائمة"><i class="fas fa-bars"></i></button>
     <span class="tb-title" id="tb-title">لوحة التحكم</span>
     <div class="tb-wil"><i class="fas fa-location-dot"></i><span id="top-wil">—</span></div>
   </div>
@@ -235,7 +303,7 @@ html,body{height:100%;font-family:'Cairo','Tajawal',sans-serif;direction:rtl;bac
         <div class="filter-bar">
           <button class="fb act" onclick="filterAppts('all',this)">الكل</button>
           <button class="fb pnd" onclick="filterAppts('pending',this)">قيد الانتظار</button>
-          <button class="fb" onclick="filterAppts('confirmed',this)" style="">مؤكدة</button>
+          <button class="fb" onclick="filterAppts('confirmed',this)">مؤكدة</button>
           <button class="fb cnl" onclick="filterAppts('cancelled',this)">ملغية</button>
           <button class="fb cnl" onclick="filterAppts('rejected',this)">مرفوضة</button>
           <input class="search-input" id="appt-search" placeholder="بحث بالاسم أو المرجع..." oninput="renderApptTable()">
@@ -259,6 +327,53 @@ html,body{height:100%;font-family:'Cairo','Tajawal',sans-serif;direction:rtl;bac
         <div id="appt-empty" class="empty-state" style="display:none">
           <i class="fas fa-calendar-xmark"></i>
           <p>لا توجد مواعيد في هذه الفئة</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAP PAGE -->
+    <div class="page" id="page-map">
+      <div class="map-card">
+        <div class="map-card-hdr">
+          <h3><i class="fas fa-map-location-dot"></i>موقع مرفقك على الخريطة</h3>
+          <div style="display:flex;gap:.6rem;align-items:center">
+            <button class="save-btn" id="fac-locate-btn" onclick="facLocateMe()" style="padding:.55rem 1.2rem;font-size:.8rem;background:var(--gl)">
+              <i class="fas fa-location-crosshairs"></i>موقعي تلقائياً
+            </button>
+            <button class="save-btn" onclick="saveMapLocation()" style="padding:.55rem 1.2rem;font-size:.8rem">
+              <i class="fas fa-floppy-disk"></i>حفظ الموقع
+            </button>
+          </div>
+        </div>
+        <div class="map-tip-bar"><i class="fas fa-circle-info"></i>انقر على الخريطة لتحديد موقع مرفقك بدقة — سيظهر للمواطنين عند البحث</div>
+        <div id="fac-map"></div>
+        <div class="map-coords">
+          <div class="coord-box">
+            <div class="cb-lbl"><i class="fas fa-arrows-up-down" style="margin-left:3px"></i>خط العرض</div>
+            <div class="cb-val" id="m-lat">—</div>
+          </div>
+          <div class="coord-box">
+            <div class="cb-lbl"><i class="fas fa-arrows-left-right" style="margin-left:3px"></i>خط الطول</div>
+            <div class="cb-val" id="m-lng">—</div>
+          </div>
+          <div class="coord-box">
+            <div class="cb-lbl"><i class="fas fa-location-dot" style="margin-left:3px;color:var(--g)"></i>الحالة</div>
+            <div class="cb-val" id="m-status" style="font-size:.78rem;color:var(--muted)">لم يُحدَّد بعد</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mini location preview -->
+      <div class="card" id="map-saved-info" style="display:none">
+        <div class="card-hdr"><h3><i class="fas fa-circle-check"></i>معلومات الموقع المحفوظة</h3></div>
+        <div style="display:flex;align-items:center;gap:1rem;font-size:.83rem;color:var(--text)">
+          <div style="width:48px;height:48px;border-radius:12px;background:rgba(27,94,66,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <i class="fas fa-map-pin" style="font-size:1.3rem;color:var(--g)"></i>
+          </div>
+          <div>
+            <div style="font-weight:700;margin-bottom:.2rem" id="saved-loc-name">—</div>
+            <div style="font-size:.74rem;color:var(--muted)" id="saved-loc-coords">—</div>
+          </div>
         </div>
       </div>
     </div>
@@ -392,10 +507,16 @@ var workDays = [0,1,2,3,4]; // Sun-Thu by default (no Fri-Sat)
   if(F.workDays) workDays = F.workDays;
   buildDaysGrid();
 
-  // Load appointments (filter by wilaya)
+  // Load appointments — فلترة دقيقة: فقط المواعيد الخاصة بهذا المرفق تحديداً
   appts = JSON.parse(localStorage.getItem('ordo_appts')||'[]').filter(function(a){
-    // Show appointments for this wilaya OR directly booked with this facility
-    return a.wilaya === F.wilaya || a.facId === F.id;
+
+    // ① موعد محجوز مباشرة بـ ID هذا المرفق
+    if(a.facId && a.facId === F.id) return true;
+
+    // ② موعد بدون facId (فرع افتراضي) — يكون من نفس الولاية ونفس النوع فقط
+    if(!a.facId && a.wilaya === F.wilaya && a.type === F.type) return true;
+
+    return false;
   });
 
   updateStats();
@@ -421,9 +542,10 @@ function showPage(name, el){
   document.getElementById('page-'+name).classList.add('act');
   document.querySelectorAll('.ni').forEach(function(n){n.classList.remove('act');});
   if(el) el.classList.add('act');
-  var titles={home:'لوحة التحكم',appts:'إدارة المواعيد',profile:'معلومات المرفق',hours:'ساعات العمل'};
+  var titles={home:'لوحة التحكم',appts:'إدارة المواعيد',map:'موقع المرفق',profile:'معلومات المرفق',hours:'ساعات العمل'};
   setText('tb-title', titles[name]||'');
   if(name==='appts') renderApptTable();
+  if(name==='map') initFacilityMap();
 }
 
 function logout(){
@@ -642,6 +764,108 @@ document.getElementById('appt-modal').addEventListener('click', function(e){
 });
 
 // =====================================================
+// MAP
+// =====================================================
+var facMap = null, facMapMarker = null, facMapLat = null, facMapLng = null;
+
+function initFacilityMap(){
+  if(facMap){ facMap.invalidateSize(); return; }
+  facMap = L.map('fac-map').setView([28.0339, 1.6596], 5);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    attribution:'© OpenStreetMap', maxZoom:19
+  }).addTo(facMap);
+
+  var pin = L.icon({
+    iconUrl:'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+    iconRetinaUrl:'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+    shadowUrl:'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+    iconSize:[25,41],iconAnchor:[12,41],popupAnchor:[1,-34],shadowSize:[41,41]
+  });
+
+  // Load saved location if exists
+  if(F.lat && F.lng){
+    facMapLat = F.lat; facMapLng = F.lng;
+    facMap.setView([F.lat, F.lng], 14);
+    facMapMarker = L.marker([F.lat, F.lng], {icon:pin}).addTo(facMap)
+      .bindPopup('<div style="font-family:Cairo,sans-serif;font-size:.8rem;font-weight:700;direction:rtl">📍 '+(F.name||'مرفقك')+'</div>').openPopup();
+    updateMapUI(F.lat, F.lng);
+    showSavedInfo();
+  }
+
+  facMap.on('click', function(e){
+    facMapLat = e.latlng.lat.toFixed(6);
+    facMapLng = e.latlng.lng.toFixed(6);
+    if(facMapMarker) facMap.removeLayer(facMapMarker);
+    facMapMarker = L.marker([facMapLat, facMapLng], {icon:pin}).addTo(facMap)
+      .bindPopup('<div style="font-family:Cairo,sans-serif;font-size:.8rem;font-weight:700;direction:rtl">📍 '+(F.name||'مرفقك')+'</div>').openPopup();
+    updateMapUI(facMapLat, facMapLng);
+  });
+}
+
+function updateMapUI(lat, lng){
+  setText('m-lat', parseFloat(lat).toFixed(6));
+  setText('m-lng', parseFloat(lng).toFixed(6));
+  setText('m-status', '✅ تم التحديد');
+  document.getElementById('m-status').style.color = 'var(--g)';
+}
+
+function showSavedInfo(){
+  var el = document.getElementById('map-saved-info');
+  el.style.display = 'block';
+  setText('saved-loc-name', F.name||'—');
+  setText('saved-loc-coords', 'خط العرض: '+parseFloat(F.lat).toFixed(4)+' | خط الطول: '+parseFloat(F.lng).toFixed(4));
+}
+
+function facLocateMe(){
+  var btn = document.getElementById('fac-locate-btn');
+  if(!navigator.geolocation){ toast('المتصفح لا يدعم تحديد الموقع','err'); return; }
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>جارٍ التحديد...';
+  btn.disabled = true;
+  navigator.geolocation.getCurrentPosition(function(pos){
+    var lat = pos.coords.latitude.toFixed(6);
+    var lng = pos.coords.longitude.toFixed(6);
+    facMapLat = lat; facMapLng = lng;
+    if(!facMap){ initFacilityMap(); setTimeout(function(){ placeMarkerOnFacMap(lat,lng); },500); }
+    else { placeMarkerOnFacMap(lat,lng); }
+    btn.innerHTML = '<i class="fas fa-circle-check"></i>تم التحديد';
+    btn.style.background = '#2e7d32';
+    setTimeout(function(){ btn.innerHTML='<i class="fas fa-location-crosshairs"></i>موقعي تلقائياً'; btn.style.background='var(--gl)'; btn.disabled=false; },2500);
+    toast('✅ تم تحديد موقعك تلقائياً');
+  }, function(err){
+    var msgs={1:'لم تسمح بالوصول للموقع',2:'تعذّر تحديد الموقع',3:'انتهت المهلة'};
+    toast(msgs[err.code]||'خطأ في تحديد الموقع','err');
+    btn.innerHTML='<i class="fas fa-location-crosshairs"></i>موقعي تلقائياً';
+    btn.disabled=false;
+  },{timeout:10000,enableHighAccuracy:true});
+}
+
+function placeMarkerOnFacMap(lat,lng){
+  var pin = L.icon({
+    iconUrl:'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+    iconRetinaUrl:'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+    shadowUrl:'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+    iconSize:[25,41],iconAnchor:[12,41],popupAnchor:[1,-34],shadowSize:[41,41]
+  });
+  if(facMapMarker) facMap.removeLayer(facMapMarker);
+  facMapMarker = L.marker([lat,lng],{icon:pin}).addTo(facMap)
+    .bindPopup('<div style="font-family:Cairo,sans-serif;font-size:.8rem;font-weight:700;direction:rtl">📍 '+(F.name||'مرفقك')+'</div>').openPopup();
+  facMap.setView([lat,lng],16);
+  updateMapUI(lat,lng);
+}
+
+function saveMapLocation(){
+  if(!facMapLat || !facMapLng){ toast('انقر على الخريطة أولاً لتحديد الموقع','err'); return; }
+  F.lat = facMapLat; F.lng = facMapLng;
+  var facs = JSON.parse(localStorage.getItem('ordo_facilities')||'[]');
+  var idx = facs.findIndex(function(f){return f.id===F.id;});
+  if(idx>=0) facs[idx] = Object.assign(facs[idx],{lat:F.lat,lng:F.lng});
+  localStorage.setItem('ordo_facilities', JSON.stringify(facs));
+  localStorage.setItem('ordo_current', JSON.stringify(F));
+  showSavedInfo();
+  toast('✅ تم حفظ موقع المرفق بنجاح');
+}
+
+// =====================================================
 // PROFILE SAVE
 // =====================================================
 function saveProfile(){
@@ -719,6 +943,26 @@ function saveHours(){
   localStorage.setItem('ordo_current',JSON.stringify(F));
   toast('تم حفظ جدول العمل بنجاح');
 }
+</script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<div class="sb-overlay" id="__overlay" onclick="toggleSidebar()"></div>
+<script>
+function toggleSidebar(){
+  var sb=document.querySelector('.sb'),ov=document.getElementById('__overlay');
+  var open=sb.classList.toggle('mob-open');
+  ov.style.display=open?'block':'none';
+  document.body.style.overflow=open?'hidden':'';
+}
+document.querySelectorAll('.ni').forEach(function(ni){
+  ni.addEventListener('click',function(){
+    if(window.innerWidth<=860){
+      document.querySelector('.sb').classList.remove('mob-open');
+      document.getElementById('__overlay').style.display='none';
+      document.body.style.overflow='';
+    }
+  });
+});
 </script>
 </body>
 </html>

@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ORDO · تسجيل الدخول</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -97,8 +98,48 @@ html,body{min-height:100vh;font-family:'Cairo','Tajawal',sans-serif;direction:rt
 .sbox p{font-size:.8rem;color:var(--muted);line-height:1.8;margin-bottom:1.2rem}
 .or-d{display:flex;align-items:center;gap:.7rem;margin:.9rem 0;color:var(--muted);font-size:.73rem}
 .or-d::before,.or-d::after{content:'';flex:1;height:1px;background:var(--b)}
-@media(max-width:860px){.wrap{grid-template-columns:1fr}.left{display:none}.right{min-height:100vh}}
-@media(max-width:480px){.ri{padding:1.6rem 1.1rem}.frow{grid-template-columns:1fr}.tgrid{grid-template-columns:repeat(2,1fr)}.tc-cit{grid-column:span 2}}
+@media(max-width:860px){
+  .wrap{grid-template-columns:1fr}
+  .left{display:none}
+  .right{min-height:100vh}
+}
+@media(max-width:520px){
+  /* layout */
+  .ri{padding:1.4rem 1rem}
+  .frow{grid-template-columns:1fr}
+  /* prevent iOS zoom on inputs (must be >=16px) */
+  .field{font-size:16px!important;padding:.8rem .85rem}
+  select.field{font-size:16px!important}
+  /* buttons – minimum 44px tap target */
+  .btn{padding:.9rem;min-height:48px;font-size:.88rem}
+  .tab{padding:.75rem .5rem;font-size:.78rem}
+  /* mode selector */
+  .mbtn{padding:.8rem .4rem}
+  .mbtn small{display:none}
+  /* type grid */
+  .tgrid{grid-template-columns:repeat(2,1fr)}
+  .tc-cit{grid-column:span 2}
+  /* heading */
+  .sc-h{font-size:1.3rem}
+  .sc-p{font-size:.75rem}
+  /* map */
+  .map-wrap #reg-map{height:185px}
+  .coords-row{grid-template-columns:1fr}
+  /* locate button */
+  #reg-locate-btn{width:100%;justify-content:center;min-height:44px;font-size:.8rem}
+  /* step nav row */
+  .frow .btn{margin-top:0}
+  .slb{font-size:.58rem}
+}
+/* MAP */
+.map-wrap{position:relative;border-radius:12px;overflow:hidden;border:1.5px solid var(--b);margin-bottom:.95rem}
+.map-wrap #reg-map{height:220px;width:100%;z-index:1}
+.map-overlay{position:absolute;top:8px;right:8px;z-index:10;display:flex;flex-direction:column;gap:5px}
+.map-tip{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.55);color:#fff;font-size:.65rem;padding:.28rem .75rem;border-radius:50px;white-space:nowrap;z-index:10;pointer-events:none;font-family:'Cairo',sans-serif}
+.coords-row{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:.95rem}
+.coord-badge{background:rgba(27,94,66,.06);border:1.5px solid rgba(27,94,66,.18);border-radius:9px;padding:.55rem .9rem;font-size:.74rem;color:var(--text);font-family:'Cairo',sans-serif;display:flex;align-items:center;gap:.4rem}
+.coord-badge i{color:var(--g);font-size:.8rem;flex-shrink:0}
+.coord-badge span{font-weight:700;color:var(--g)}
 </style>
 </head>
 <body>
@@ -117,11 +158,16 @@ html,body{min-height:100vh;font-family:'Cairo','Tajawal',sans-serif;direction:rt
     <div class="feat"><i class="fas fa-map-location-dot"></i>تغطية 58 ولاية جزائرية</div>
     <div class="feat"><i class="fas fa-bell"></i>تذكيرات أوتوماتيكية بموعدك</div>
   </div>
-  <div class="left-foot">© 2025 ORDO — الجمهورية الجزائرية الديمقراطية الشعبية</div>
+  <div class="left-foot">© 2026 ORDO — الجمهورية الجزائرية الديمقراطية الشعبية</div>
 </div>
 
 <div class="right">
 <div class="ri">
+  <!-- زر الرجوع للرئيسية -->
+  <a href="index.html" style="display:inline-flex;align-items:center;gap:.45rem;font-family:'Cairo',sans-serif;font-size:.76rem;font-weight:700;color:var(--muted);text-decoration:none;margin-bottom:1.2rem;transition:color .18s;width:fit-content" onmouseover="this.style.color='var(--g)'" onmouseout="this.style.color='var(--muted)'">
+    <i class="fas fa-arrow-right"></i>العودة للرئيسية
+  </a>
+
   <div style="text-align:center;margin-bottom:1.5rem">
     <div style="font-family:'Tajawal',sans-serif;font-size:1.35rem;font-weight:800;color:var(--text);margin-bottom:.25rem">مرحباً بك في ORDO</div>
     <div style="font-size:.76rem;color:var(--muted)">اختر نوع حسابك للمتابعة</div>
@@ -215,8 +261,20 @@ html,body{min-height:100vh;font-family:'Cairo','Tajawal',sans-serif;direction:rt
       <!-- s2 -->
       <div class="rstep" id="cst2">
         <div class="frow">
-          <div class="fg"><label>الاسم <span class="req">*</span></label><input class="field" id="c-fn" type="text" placeholder="الاسم"></div>
-          <div class="fg"><label>اللقب <span class="req">*</span></label><input class="field" id="c-ln" type="text" placeholder="اللقب"></div>
+          <div class="fg"><label>الاسم الشخصي <span class="req">*</span></label><input class="field" id="c-fn" type="text" placeholder="الاسم"></div>
+          <div class="fg"><label>اللقب العائلي <span class="req">*</span></label><input class="field" id="c-ln" type="text" placeholder="اللقب"></div>
+        </div>
+        <div class="frow">
+          <div class="fg"><label>تاريخ الميلاد <span class="req">*</span></label><input class="field" id="c-dob" type="date"></div>
+          <div class="fg"><label>مكان الميلاد / البلدية <span class="req">*</span></label><input class="field" id="c-pob" type="text" placeholder="مثال: بلدية تيارت"></div>
+        </div>
+        <div class="frow">
+          <div class="fg"><label>اسم الأب <span class="req">*</span></label><input class="field" id="c-ffn" type="text" placeholder="اسم الأب الشخصي"></div>
+          <div class="fg"><label>لقب الأب <span class="req">*</span></label><input class="field" id="c-fln" type="text" placeholder="لقب الأب ( لقب العائلة)"></div>
+        </div>
+        <div class="frow">
+          <div class="fg"><label>اسم الأم <span class="req">*</span></label><input class="field" id="c-mfn" type="text" placeholder="اسم الأم الشخصي"></div>
+          <div class="fg"><label>لقب الأم   <span class="req">*</span></label><input class="field" id="c-mln" type="text" placeholder="لقب الأم "></div>
         </div>
         <div class="fg"><label>البريد الإلكتروني <span class="req">*</span></label>
           <div class="fi"><i class="ico fas fa-envelope"></i><input class="field" id="c-em" type="email" placeholder="example@email.com"></div></div>
@@ -318,6 +376,24 @@ html,body{min-height:100vh;font-family:'Cairo','Tajawal',sans-serif;direction:rt
         <div class="errmsg" id="f-wil-e">اختر الولاية</div></div>
       <div class="fg"><label>العنوان الكامل</label>
         <div class="fi"><i class="ico fas fa-map-marker-alt"></i><input class="field" id="f-ad" type="text" placeholder="العنوان التفصيلي"></div></div>
+
+      <!-- MAP LOCATION PICKER -->
+      <div class="fg">
+        <label><i class="fas fa-map-location-dot" style="color:var(--g);margin-left:4px"></i>موقع المرفق على الخريطة <span style="font-size:.65rem;color:var(--muted);font-weight:400">(انقر على الخريطة لتحديد الموقع)</span></label>
+        <div style="display:flex;gap:.5rem;margin-bottom:.55rem">
+          <button type="button" id="reg-locate-btn" onclick="regLocateMe()" style="display:flex;align-items:center;gap:.45rem;padding:.5rem 1rem;background:var(--g);color:#fff;border:none;border-radius:8px;font-family:'Cairo',sans-serif;font-size:.76rem;font-weight:700;cursor:pointer;transition:all .2s">
+            <i class="fas fa-location-crosshairs"></i>تحديد موقعي تلقائياً
+          </button>
+        </div>
+        <div class="map-wrap">
+          <div id="reg-map"></div>
+          <div class="map-tip" id="reg-map-tip">📍 انقر على الخريطة لتحديد موقع مرفقك</div>
+        </div>
+        <div class="coords-row" id="coords-row" style="display:none">
+          <div class="coord-badge"><i class="fas fa-arrows-up-down"></i>خط العرض: <span id="disp-lat">—</span></div>
+          <div class="coord-badge"><i class="fas fa-arrows-left-right"></i>خط الطول: <span id="disp-lng">—</span></div>
+        </div>
+      </div>
       <div class="fg"><label>رقم الهاتف الرسمي <span class="req">*</span></label>
         <div class="fi"><i class="ico fas fa-phone"></i><input class="field" id="f-ph" type="tel" placeholder="04X XX XX XX"></div></div>
       <div class="fg"><label>البريد الإلكتروني الرسمي <span class="req">*</span></label>
@@ -380,12 +456,14 @@ function setMode(m){
   document.getElementById('lf').style.display=m==='facility'?'block':'none';
   document.getElementById('rc').style.display=m==='citizen'?'block':'none';
   document.getElementById('rf').style.display=m==='facility'?'block':'none';
+  if(m==='facility') initFacMap();
 }
 function switchTab(t){
   document.getElementById('tl').classList.toggle('act',t==='login');
   document.getElementById('tr').classList.toggle('act',t==='register');
   document.getElementById('scr-login').classList.toggle('act',t==='login');
   document.getElementById('scr-reg').classList.toggle('act',t==='register');
+  if(t==='register' && mode==='facility') setTimeout(initFacMap, 150);
 }
 
 /* CITIZEN REG STEPS */
@@ -399,6 +477,10 @@ function cSt(n){
     var ok=true;
     if(!gv('c-fn').trim()){erf('c-fn');ok=false;}
     if(!gv('c-ln').trim()){erf('c-ln');ok=false;}
+    if(!gv('c-dob')){ok=false;toast('تاريخ الميلاد مطلوب','err');}
+    if(!gv('c-pob').trim()){ok=false;toast('مكان الميلاد مطلوب','err');}
+    if(!gv('c-ffn').trim()||!gv('c-fln').trim()){ok=false;toast('اسم ولقب الأب مطلوبان','err');}
+    if(!gv('c-mfn').trim()||!gv('c-mln').trim()){ok=false;toast('اسم ولقب الأم مطلوبان','err');}
     var em=gv('c-em');if(!em||!em.includes('@')){erf('c-em');ok=false;}
     if(!gv('c-ph').trim()){erf('c-ph');ok=false;}
     if(!gv('c-wil')){erf('c-wil');ok=false;}
@@ -430,12 +512,87 @@ function doRC(){
   var users=JSON.parse(localStorage.getItem('ordo_users')||'[]');
   var nin=gv('c-nin');
   if(users.find(function(u){return u.nin===nin&&u.role==='citizen';})){toast('رقم التعريف الوطني مسجّل مسبقاً','err');return;}
-  users.push({role:'citizen',type:cType,nin:nin,fname:gv('c-fn'),lname:gv('c-ln'),email:gv('c-em'),phone:gv('c-ph'),wilaya:gv('c-wil'),pw:pw,created:new Date().toLocaleDateString('ar-DZ')});
+  users.push({
+    role:'citizen',type:cType,nin:nin,
+    fname:gv('c-fn'),lname:gv('c-ln'),
+    dob:gv('c-dob'),pob:gv('c-pob'),
+    fatherFname:gv('c-ffn'),fatherLname:gv('c-fln'),
+    motherFname:gv('c-mfn'),motherLname:gv('c-mln'),
+    email:gv('c-em'),phone:gv('c-ph'),wilaya:gv('c-wil'),
+    pw:pw,created:new Date().toLocaleDateString('ar-DZ')
+  });
   localStorage.setItem('ordo_users',JSON.stringify(users));
   cSt('ok');
 }
 
 /* FACILITY REG */
+var facMapInited = false, facMarker = null, facLat = null, facLng = null;
+
+function initFacMap(){
+  if(facMapInited) return;
+  facMapInited = true;
+  setTimeout(function(){
+    var map = L.map('reg-map', {zoomControl:true}).setView([28.0339, 1.6596], 5); // Algeria center
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+      attribution:'© OpenStreetMap',maxZoom:19
+    }).addTo(map);
+
+    var pin = L.icon({
+      iconUrl:'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+      iconRetinaUrl:'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+      shadowUrl:'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+      iconSize:[25,41],iconAnchor:[12,41],popupAnchor:[1,-34],shadowSize:[41,41]
+    });
+
+    map.on('click', function(e){
+      facLat = e.latlng.lat.toFixed(6);
+      facLng = e.latlng.lng.toFixed(6);
+      if(facMarker) map.removeLayer(facMarker);
+      facMarker = L.marker([facLat, facLng], {icon:pin}).addTo(map)
+        .bindPopup('<div style="font-family:Cairo,sans-serif;font-size:.78rem;font-weight:700;direction:rtl">📍 موقع مرفقك</div>').openPopup();
+      document.getElementById('disp-lat').textContent = facLat;
+      document.getElementById('disp-lng').textContent = facLng;
+      document.getElementById('coords-row').style.display = 'grid';
+      document.getElementById('reg-map-tip').style.display = 'none';
+    });
+
+    // expose map & marker refs for locate button
+    window._regMap = map; window._regPin = pin;
+  }, 100);
+}
+
+function regLocateMe(){
+  var btn = document.getElementById('reg-locate-btn');
+  if(!navigator.geolocation){ toast('المتصفح لا يدعم تحديد الموقع','err'); return; }
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>جارٍ التحديد...';
+  btn.disabled = true;
+  navigator.geolocation.getCurrentPosition(function(pos){
+    var lat = pos.coords.latitude.toFixed(6);
+    var lng = pos.coords.longitude.toFixed(6);
+    facLat = lat; facLng = lng;
+    var map = window._regMap, pin = window._regPin;
+    if(map){
+      if(facMarker) map.removeLayer(facMarker);
+      facMarker = L.marker([lat, lng], {icon:pin}).addTo(map)
+        .bindPopup('<div style="font-family:Cairo,sans-serif;font-size:.78rem;font-weight:700;direction:rtl">📍 موقع مرفقك</div>').openPopup();
+      map.setView([lat, lng], 16);
+    }
+    document.getElementById('disp-lat').textContent = lat;
+    document.getElementById('disp-lng').textContent = lng;
+    document.getElementById('coords-row').style.display = 'grid';
+    document.getElementById('reg-map-tip').style.display = 'none';
+    btn.innerHTML = '<i class="fas fa-circle-check"></i>تم التحديد';
+    btn.style.background = '#2e7d32';
+    setTimeout(function(){ btn.innerHTML='<i class="fas fa-location-crosshairs"></i>تحديد موقعي تلقائياً'; btn.style.background='var(--g)'; btn.disabled=false; }, 2500);
+    toast('✅ تم تحديد موقعك تلقائياً');
+  }, function(err){
+    var msgs = {1:'لم تسمح بالوصول للموقع',2:'تعذّر تحديد الموقع',3:'انتهت المهلة'};
+    toast(msgs[err.code]||'خطأ في تحديد الموقع','err');
+    btn.innerHTML = '<i class="fas fa-location-crosshairs"></i>تحديد موقعي تلقائياً';
+    btn.disabled = false;
+  }, {timeout:10000, enableHighAccuracy:true});
+}
+
 function doRF(){
   var ok=true;
   if(!gv('f-tp')){erf('f-tp');se('f-tp-e');ok=false;}
@@ -450,7 +607,7 @@ function doRF(){
   he('f-em-e');he('f-pw2-e');
   var facs=JSON.parse(localStorage.getItem('ordo_facilities')||'[]');
   if(facs.find(function(f){return f.email===em;})){se('f-em-e');toast('هذا البريد مسجّل بالفعل','err');return;}
-  facs.push({role:'facility',type:gv('f-tp'),name:gv('f-nm'),wilaya:gv('f-wil'),address:gv('f-ad'),phone:gv('f-ph'),email:em,from:gv('f-fr'),to:gv('f-to'),pw:pw,id:'FAC-'+Date.now(),created:new Date().toLocaleDateString('ar-DZ')});
+  facs.push({role:'facility',type:gv('f-tp'),name:gv('f-nm'),wilaya:gv('f-wil'),address:gv('f-ad'),phone:gv('f-ph'),email:em,from:gv('f-fr'),to:gv('f-to'),pw:pw,id:'FAC-'+Date.now(),created:new Date().toLocaleDateString('ar-DZ'),lat:facLat,lng:facLng});
   localStorage.setItem('ordo_facilities',JSON.stringify(facs));
   toast('تم تسجيل المرفق بنجاح!');
   setTimeout(function(){switchTab('login');setMode('facility');},1500);
@@ -484,5 +641,6 @@ function loginF(){
   window.location.href='facility.html';
 }
 </script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </body>
 </html>

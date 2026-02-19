@@ -145,8 +145,58 @@ html,body{height:100%;font-family:'Cairo','Tajawal',sans-serif;direction:rtl;bac
 /* TOAST */
 .toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(90px);color:var(--w);padding:.72rem 1.5rem;border-radius:50px;font-size:.79rem;font-weight:700;box-shadow:0 6px 20px rgba(0,0,0,.2);transition:transform .38s cubic-bezier(.34,1.56,.64,1);z-index:999;display:flex;align-items:center;gap:.45rem;white-space:nowrap}
 .toast.show{transform:translateX(-50%) translateY(0)}
-@media(max-width:860px){.sb{display:none}.main{margin-right:0}}
-@media(max-width:580px){.svc-grid{grid-template-columns:repeat(2,1fr)}.content{padding:1rem}.time-grid{grid-template-columns:repeat(3,1fr)}.frow{grid-template-columns:1fr}.doc-type-grid{grid-template-columns:1fr}}
+/* HAMBURGER + OVERLAY */
+.ham-btn{display:none;width:42px;height:42px;border-radius:10px;border:1.5px solid var(--b);background:var(--w);align-items:center;justify-content:center;cursor:pointer;color:var(--text);font-size:1.05rem;flex-shrink:0}
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:98;backdrop-filter:blur(2px)}
+
+@media(max-width:860px){
+  .sb{transform:translateX(110%);transition:transform .28s cubic-bezier(.4,0,.2,1)}
+  .sb.mob-open{transform:translateX(0);box-shadow:-6px 0 28px rgba(0,0,0,.35)}
+  .main{margin-right:0}
+  .ham-btn{display:flex!important}
+  .topbar{padding:0 1rem}
+  .wil-badge{display:none}
+}
+
+@media(max-width:580px){
+  .content{padding:1rem}
+  /* forms */
+  .field{font-size:16px!important}
+  select.field{font-size:16px!important}
+  .frow{grid-template-columns:1fr}
+  /* service grid */
+  .svc-grid{grid-template-columns:repeat(2,1fr)}
+  .svc-card{padding:.7rem .3rem}
+  .svc-card i{font-size:1rem}
+  .svc-card span{font-size:.65rem}
+  /* buttons */
+  .btn{min-height:48px}
+  .btn-row{flex-direction:column}
+  .btn-row .btn{width:100%}
+  /* calendar */
+  .cal-day{font-size:.68rem;min-height:30px;padding:.3rem .1rem;border-radius:5px}
+  .cal-day-hdr{font-size:.58rem;padding:.2rem 0}
+  .cal-grid{gap:.2rem}
+  /* time slots */
+  .time-grid{grid-template-columns:repeat(3,1fr)}
+  .ts{font-size:.7rem;padding:.48rem .1rem}
+  /* cards */
+  .card{padding:1.1rem}
+  .card h3{font-size:.9rem}
+  /* tabs */
+  .mtab{font-size:.73rem;padding:.58rem .4rem}
+  /* doc grid */
+  .doc-type-grid{grid-template-columns:1fr}
+  /* my appts */
+  .ac{flex-wrap:wrap;gap:.5rem}
+  .ac-meta{display:flex;align-items:center;gap:.6rem;width:100%;justify-content:space-between}
+  .ac-ico{width:38px;height:38px;font-size:.95rem}
+  /* wizard */
+  .wiz{margin-bottom:.9rem}
+  /* topbar */
+  .topbar{height:52px}
+  .tb-title{font-size:.95rem}
+}
 </style>
 </head>
 <body>
@@ -180,6 +230,7 @@ html,body{height:100%;font-family:'Cairo','Tajawal',sans-serif;direction:rtl;bac
 <!-- MAIN -->
 <div class="main">
   <div class="topbar">
+    <button class="ham-btn" onclick="toggleSidebar()" aria-label="القائمة"><i class="fas fa-bars"></i></button>
     <span class="tb-title" id="tb-title">حجز موعد</span>
     <div class="wil-badge"><i class="fas fa-location-dot"></i><span id="top-wil">—</span></div>
   </div>
@@ -801,6 +852,22 @@ function buildSummary(){
 }
 
 function confirmAppt(){
+
+  /* ══ فحص: هل يوجد حساب مسجّل لهذا النوع في ولاية المستخدم؟ ══ */
+  var facilities = JSON.parse(localStorage.getItem('ordo_facilities') || '[]');
+  var svcType    = selSvc ? selSvc.type : '';
+  var userWilaya = U.wilaya || '';
+
+  var found = facilities.filter(function(f){
+    return f.type === svcType && f.wilaya === userWilaya;
+  });
+
+  if(found.length === 0){
+    showNoFacilityModal(svcType, userWilaya);
+    return;
+  }
+  /* ════════════════════════════════════════════════════════════ */
+
   var allAppts = JSON.parse(localStorage.getItem('ordo_appts')||'[]');
   var ref = 'ORD-'+new Date().getFullYear()+'-'+String(allAppts.length+1).padStart(6,'0');
 
@@ -850,7 +917,82 @@ function confirmAppt(){
   toast('تم تأكيد موعدك بنجاح!');
 }
 
-function resetAppt(){
+/* مودال: لا يوجد حساب مسجّل لهذا النوع */
+function showNoFacilityModal(svcType, wilaya){
+  var old = document.getElementById('__nofac_modal');
+  if(old) old.remove();
+
+  var SVC_ICONS = {
+    'بلدية':'fas fa-building-columns','ولاية':'fas fa-flag',
+    'دائرة':'fas fa-sitemap','سونلغاز':'fas fa-bolt',
+    'نسار':'fas fa-water','محكمة':'fas fa-scale-balanced',
+    'موثق':'fas fa-file-signature','محامي':'fas fa-briefcase',
+    'محضر قضائي':'fas fa-stamp','مهندس معماري':'fas fa-ruler-combined',
+    'مستشفى':'fas fa-hospital','بريد الجزائر':'fas fa-envelope',
+    'مدرسة':'fas fa-school','جامعة':'fas fa-graduation-cap'
+  };
+  var ico = SVC_ICONS[svcType] || 'fas fa-building';
+
+  var m = document.createElement('div');
+  m.id = '__nofac_modal';
+  m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:3000;display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(3px)';
+
+  m.innerHTML =
+    '<div style="background:#fff;border-radius:20px;padding:2rem 1.8rem;max-width:400px;width:100%;'
+  + 'box-shadow:0 24px 60px rgba(0,0,0,0.2);text-align:center;direction:rtl;font-family:Cairo,Tajawal,sans-serif;'
+  + 'animation:_mslide .3s cubic-bezier(.34,1.56,.64,1)">'
+
+  /* أيقونة المرفق فوق + علامة X */
+  + '<div style="position:relative;width:72px;height:72px;margin:0 auto 1.3rem">'
+  + '<div style="width:72px;height:72px;border-radius:50%;background:#fff3f3;border:2px solid #ffd0d0;'
+  + 'display:flex;align-items:center;justify-content:center;font-size:1.7rem;color:#c62828">'
+  + '<i class="fas fa-ban"></i></div>'
+  + '<div style="position:absolute;bottom:-2px;right:-2px;width:26px;height:26px;border-radius:50%;'
+  + 'background:#f0f9f5;border:2px solid #c8ddd6;display:flex;align-items:center;justify-content:center;'
+  + 'font-size:.72rem;color:#1b5e42"><i class="'+ico+'"></i></div>'
+  + '</div>'
+
+  /* النص */
+  + '<h3 style="font-family:Tajawal,sans-serif;font-size:1.1rem;font-weight:800;color:#1a2a22;margin-bottom:.6rem">'
+  + 'لا يوجد حساب مسجّل</h3>'
+
+  + '<p style="font-size:.84rem;color:#5a7066;line-height:2;margin-bottom:1.6rem">'
+  + 'لم يتم تسجيل أي مرفق من نوع<br>'
+  + '<strong style="color:#1a2a22;font-size:.95rem"> '+svcType+' </strong><br>'
+  + 'في <strong style="color:#1b5e42">ولاية '+wilaya+'</strong> حتى الآن.<br>'
+  + '<span style="font-size:.78rem;color:#8aab97">يُرجى اختيار نوع خدمة آخر أو المحاولة لاحقاً.</span>'
+  + '</p>'
+
+  /* زرّان */
+  + '<div style="display:flex;gap:.7rem">'
+  + '<button onclick="document.getElementById(\'__nofac_modal\').remove()" '
+  + 'style="flex:1;padding:.8rem;border:1.5px solid #dde6e2;border-radius:10px;background:#fff;'
+  + 'color:#5a7066;font-family:Cairo,sans-serif;font-size:.84rem;font-weight:700;cursor:pointer;transition:all .18s" '
+  + 'onmouseover="this.style.borderColor=\'#1b5e42\';this.style.color=\'#1b5e42\'" '
+  + 'onmouseout="this.style.borderColor=\'#dde6e2\';this.style.color=\'#5a7066\'">'
+  + '<i class="fas fa-arrow-right" style="margin-left:5px"></i>رجوع</button>'
+
+  + '<button onclick="document.getElementById(\'__nofac_modal\').remove();goSt(1);resetAppt()" '
+  + 'style="flex:1;padding:.8rem;border:none;border-radius:10px;background:#1b5e42;'
+  + 'color:#fff;font-family:Cairo,sans-serif;font-size:.84rem;font-weight:700;cursor:pointer;transition:all .18s" '
+  + 'onmouseover="this.style.background=\'#133d2c\'" onmouseout="this.style.background=\'#1b5e42\'">'
+  + '<i class="fas fa-th-large" style="margin-left:5px"></i>خدمة أخرى</button>'
+  + '</div>'
+
+  + '</div>';
+
+  /* إضافة animation */
+  if(!document.getElementById('__nofac_style')){
+    var s = document.createElement('style');
+    s.id  = '__nofac_style';
+    s.textContent = '@keyframes _mslide{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}';
+    document.head.appendChild(s);
+  }
+
+  /* إغلاق بالضغط خارج */
+  m.addEventListener('click', function(e){ if(e.target === m) m.remove(); });
+  document.body.appendChild(m);
+}
   selSvc=null; selBranch=''; selBranchName=''; selDate=''; selTime='';
   document.querySelectorAll('.svc-card').forEach(function(c){ c.classList.remove('sel'); });
   var purposeEl = document.getElementById('ap-purpose');
@@ -869,7 +1011,6 @@ function resetAppt(){
   calMonth = new Date().getMonth();
   renderCalendar();
   updateWizard(1);
-}
 
 // ─────────────────────────────────────────────
 // TABS
@@ -973,70 +1114,271 @@ function docRow(k,v){
 function genDoc(){
   if(!selectedDocType){ toast('اختر نوع الوثيقة أولاً','err'); return; }
   var area  = document.getElementById('doc-prev-area');
-  var title = selectedDocType==='birth' ? 'شهادة الميلاد' : 'بطاقة الإقامة';
+  var titles= {birth:'شهادة الميلاد',res:'بطاقة إقامة'};
+  var title = titles[selectedDocType]||selectedDocType;
   var body  = selectedDocType==='birth' ? buildBirth() : buildRes();
-  area.style.display = 'block';
-  area.innerHTML = '<div class="doc-prev">'
-    +'<div class="doc-prev-hdr"><h4><i class="fas fa-file-alt" style="margin-left:.4rem"></i>'+title+'</h4>'
-    +'<button onclick="printDoc()" style="background:rgba(255,255,255,0.18);color:#fff;border:1px solid rgba(255,255,255,0.28);border-radius:6px;padding:.35rem .9rem;font-family:Cairo,sans-serif;font-size:.75rem;font-weight:700;cursor:pointer"><i class="fas fa-print" style="margin-left:.35rem"></i>طباعة / PDF</button>'
+  area.style.display='block';
+  area.innerHTML=
+    '<div class="doc-prev">'
+    +'<div class="doc-prev-hdr">'
+    +'<div style="display:flex;align-items:center;gap:.6rem">'
+    +'<i class="fas fa-file-contract" style="font-size:1.1rem"></i>'
+    +'<h4 style="font-size:.95rem;font-weight:800">'+title+'</h4></div>'
+    +'<button onclick="printDoc()" style="display:flex;align-items:center;gap:.4rem;background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:7px;padding:.4rem 1rem;font-family:Cairo,sans-serif;font-size:.78rem;font-weight:700;cursor:pointer;transition:all .2s" onmouseover="this.style.background=\'rgba(255,255,255,0.25)\'" onmouseout="this.style.background=\'rgba(255,255,255,0.15)\'">'
+    +'<i class="fas fa-file-pdf"></i>استخراج PDF</button>'
     +'</div>'
-    +'<div style="padding:1.3rem"><div id="doc-content" class="doc-frame" style="border:1px solid var(--b);border-radius:9px;padding:1.8rem">'+body+'</div></div>'
-    +'</div>';
+    +'<div style="padding:1.4rem 1.4rem 1rem">'
+    +'<div id="doc-content">'+body+'</div>'
+    +'</div></div>';
   area.scrollIntoView({behavior:'smooth'});
-  toast('تم توليد الوثيقة — اضغط طباعة للحفظ كـ PDF');
+  toast('تم توليد الوثيقة — اضغط استخراج PDF');
+}
+
+/* ---- shared helpers ---- */
+function dv(k,v){ // doc value row
+  return '<tr>'
+    +'<td style="padding:7px 10px;font-size:9.5pt;color:#4a5a52;font-weight:600;width:42%;border-bottom:1px solid #e8ede9;white-space:nowrap">'+k+'</td>'
+    +'<td style="padding:7px 10px;font-size:9.5pt;font-weight:800;color:#1a2a22;border-bottom:1px solid #e8ede9">'+v+'</td>'
+    +'</tr>';
+}
+function ds(title){ // section separator
+  return '<tr><td colspan="2" style="padding:10px 10px 4px;font-size:8pt;font-weight:800;color:#1b5e42;text-transform:uppercase;letter-spacing:1px;border-bottom:2px solid #1b5e42;background:#f8faf8">'+title+'</td></tr>';
 }
 
 function buildBirth(){
-  var u=U, t=new Date().toLocaleDateString('ar-DZ');
-  return '<div class="doc-off-hdr"><h2>الجمهورية الجزائرية الديمقراطية الشعبية</h2>'
-    +'<p>وزارة الداخلية والجماعات المحلية</p>'
-    +'<strong style="display:block;font-size:.95rem;margin-top:.6rem">شهادة الميلاد</strong>'
-    +'<small style="color:var(--muted)">Extrait d\'Acte de Naissance</small></div>'
-    +'<div style="display:flex;justify-content:space-between;font-size:.72rem;margin-bottom:.8rem">'
-    +'<span>رقم التعريف الوطني: <strong>'+(u.nin||'—')+'</strong></span>'
-    +'<span>رقم السجل: <strong>MC-'+(u.nin||'').substring(0,8)+'</strong></span></div>'
-    +docRow('الاسم (Nom)',u.lname||'—')+docRow('اللقب (Prénom)',u.fname||'—')
-    +docRow('تاريخ الميلاد',u.dob||'—')+docRow('مكان الميلاد',u.pob||u.wilaya||'—')
-    +docRow('الجنسية','جزائرية — Algérienne')
-    +docRow('اسم الأب',u.fathername||'—')+docRow('اسم الأم',u.mothername||'—')
-    +'<div class="doc-stamp"><div class="doc-sig"><div class="stamp-c">الجمهورية<br>الجزائرية<br>الديمقراطية<br>الشعبية</div><span>ختم البلدية</span></div>'
-    +'<div class="doc-sig"><span>حرر بـ: '+(u.wilaya||'—')+'</span><br><span>بتاريخ: '+t+'</span><br><br><strong>رئيس المجلس الشعبي البلدي</strong></div></div>'
-    +'<div style="margin-top:1.3rem;font-size:.66rem;color:var(--muted);text-align:center;border-top:1px solid var(--b);padding-top:.7rem">هذه الوثيقة صادرة عبر منصة ORDO الرقمية — للتحقق تواصل مع البلدية المختصة</div>';
+  var u=U;
+  var t=new Date().toLocaleDateString('ar-DZ');
+  var refNum='MC-'+new Date().getFullYear()+'-'+(u.nin||'').substring(0,6);
+
+  // Format DOB nicely if available
+  var dobDisplay=u.dob||'—';
+  if(u.dob){
+    try{
+      var dp=new Date(u.dob);
+      var mn=['يناير','فبراير','مارس','أبريل','ماي','جوان','جويلية','أوت','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+      dobDisplay=dp.getDate()+' '+mn[dp.getMonth()]+' '+dp.getFullYear();
+    }catch(e){}
+  }
+
+  var fullName=(u.fname||'—')+' '+(u.lname||'—');
+  var fatherFull=(u.fatherFname||'—')+' '+(u.fatherLname||u.lname||'—');
+  var motherFull=(u.motherFname||'—')+' '+(u.motherLname||'—');
+  var commune=u.pob||u.wilaya||'—';
+
+  return [
+    /* === LETTERHEAD === */
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding-bottom:12px;border-bottom:3px solid #1b5e42">',
+    '<div style="text-align:center">',
+    '<div style="font-size:7pt;font-weight:800;color:#1b5e42;letter-spacing:.5px;line-height:1.6">الجمهورية الجزائرية الديمقراطية الشعبية</div>',
+    '<div style="font-size:6.5pt;color:#5a7066;line-height:1.5">République Algérienne Démocratique et Populaire</div>',
+    '<div style="font-size:7pt;font-weight:700;color:#4a5a52;margin-top:2px">وزارة الداخلية والجماعات المحلية</div>',
+    '<div style="font-size:6.5pt;color:#5a7066">Ministère de l\'Intérieur et des Collectivités Locales</div>',
+    '</div>',
+    '<div style="text-align:center;flex-shrink:0;margin:0 18px">',
+    '<div style="width:56px;height:56px;border-radius:50%;border:3px solid #1b5e42;display:flex;align-items:center;justify-content:center;background:#f0f8f4;margin:0 auto">',
+    '<div style="font-size:6pt;font-weight:800;color:#1b5e42;text-align:center;line-height:1.3">الجمهورية<br>الجزائرية</div>',
+    '</div>',
+    '</div>',
+    '<div style="text-align:center">',
+    '<div style="font-size:7pt;font-weight:800;color:#1b5e42;line-height:1.6">بلدية: <strong>'+commune+'</strong></div>',
+    '<div style="font-size:6.5pt;color:#5a7066">Commune: '+commune+'</div>',
+    '<div style="font-size:7pt;color:#4a5a52;margin-top:2px">ولاية: '+(u.wilaya||'—')+'</div>',
+    '</div></div>',
+
+    /* === TITLE === */
+    '<div style="text-align:center;margin:14px 0 16px">',
+    '<div style="display:inline-block;background:#1b5e42;color:#fff;font-size:13pt;font-weight:800;padding:5px 28px;border-radius:4px;letter-spacing:1px">شهادة الميلاد</div>',
+    '<div style="font-size:9pt;color:#5a7066;margin-top:4px;font-style:italic">Extrait d\'Acte de Naissance</div>',
+    '</div>',
+
+    /* === REF BAND === */
+    '<div style="display:flex;justify-content:space-between;background:#f4f6f5;border-radius:6px;padding:6px 12px;margin-bottom:14px;font-size:7.5pt;color:#5a7066">',
+    '<span>رقم السجل: <strong style="color:#1a2a22">'+refNum+'</strong></span>',
+    '<span>رقم التعريف الوطني (NIN): <strong style="color:#1a2a22">'+(u.nin||'—')+'</strong></span>',
+    '</div>',
+
+    /* === TABLE === */
+    '<table style="width:100%;border-collapse:collapse;border:1px solid #dde6e2;border-radius:8px;overflow:hidden">',
+    ds('المعلومات الشخصية — Informations Personnelles'),
+    dv('الاسم واللقب — Nom et Prénom', fullName),
+    dv('تاريخ الميلاد — Date de Naissance', dobDisplay),
+    dv('مكان الميلاد / البلدية — Commune de Naissance', commune),
+    dv('الجنس — Sexe', u.gender||'—'),
+    dv('الجنسية — Nationalité', 'جزائرية — Algérienne'),
+    ds('معلومات الأب — Informations du Père'),
+    dv('اسم الأب ولقبه — Nom et Prénom du Père', fatherFull),
+    ds('معلومات الأم — Informations de la Mère'),
+    dv('اسم الأم ولقبها قبل الزواج — Nom et Prénom de la Mère', motherFull),
+    '</table>',
+
+    /* === SIGNATURES === */
+    '<div style="display:flex;justify-content:space-between;margin-top:22px;padding-top:14px;border-top:1px solid #dde6e2;align-items:flex-end">',
+    '<div style="text-align:center;min-width:120px">',
+    '<div style="width:72px;height:72px;border-radius:50%;border:3px dotted rgba(27,94,66,.35);display:flex;align-items:center;justify-content:center;font-size:6pt;color:rgba(27,94,66,.4);font-weight:800;text-align:center;line-height:1.4;margin:0 auto 5px">الجمهورية<br>الجزائرية<br>الديمقراطية<br>الشعبية</div>',
+    '<div style="font-size:7.5pt;color:#5a7066">ختم البلدية</div>',
+    '</div>',
+    '<div style="text-align:center;font-size:8pt;color:#4a5a52;line-height:2">',
+    '<div>حُرِّر بـ: <strong>'+commune+'</strong></div>',
+    '<div>بتاريخ: <strong>'+t+'</strong></div>',
+    '<div style="margin-top:22px;font-size:8.5pt;font-weight:800;color:#1a2a22">رئيس المجلس الشعبي البلدي</div>',
+    '<div style="margin-top:4px;font-size:7pt;color:#5a7066">Président de l\'APC</div>',
+    '</div>',
+    '<div style="text-align:center;min-width:120px">',
+    '<div style="width:72px;height:72px;border-radius:50%;border:3px dotted rgba(27,94,66,.35);margin:0 auto 5px"></div>',
+    '<div style="font-size:7.5pt;color:#5a7066">التوقيع</div>',
+    '</div></div>',
+
+    /* === FOOTER NOTE === */
+    '<div style="margin-top:14px;padding:8px 12px;background:#fffbf0;border:1px solid rgba(200,168,75,.3);border-radius:6px;font-size:7pt;color:#5a7066;text-align:center;line-height:1.8">',
+    'هذه الوثيقة صادرة إلكترونياً عبر منصة <strong>ORDO</strong> — للتحقق من صحتها تواصل مع البلدية المختصة',
+    '<br>Ce document est émis électroniquement via la plateforme ORDO',
+    '</div>',
+  ].join('');
 }
 
 function buildRes(){
-  var u=U, t=new Date().toLocaleDateString('ar-DZ');
-  return '<div class="doc-off-hdr"><h2>الجمهورية الجزائرية الديمقراطية الشعبية</h2>'
-    +'<p>وزارة الداخلية</p><p>ولاية: '+(u.wilaya||'—')+'</p>'
-    +'<strong style="display:block;font-size:1.05rem;margin-top:.7rem">بطاقة إقامة</strong></div>'
-    +'<p style="font-size:.82rem;margin-bottom:1.1rem">نحن، رئيس المجلس الشعبي البلدي:</p>'
-    +'<p style="font-size:.92rem;font-weight:800;margin-bottom:1.2rem">نشهد بأن:</p>'
-    +docRow('السيد/ة',(u.fname||'—')+' '+(u.lname||'—'))
-    +docRow('المولود بتاريخ',u.dob||'—')
-    +docRow('الجنسية','جزائرية')
-    +docRow('رقم التعريف الوطني',u.nin||'—')
-    +'<p style="margin-top:1.3rem;font-size:.8rem;line-height:2">يقيم بنفس العنوان منذ أكثر من ستة (6) أشهر<br>وقد سُلِّمت له هذه الشهادة للإدلاء بها فيما يسمح به القانون</p>'
-    +'<div class="doc-stamp"><div class="doc-sig"><div class="stamp-c">الجمهورية<br>الجزائرية<br>الديمقراطية<br>الشعبية</div><span>رئيس المجلس الشعبي البلدي</span></div>'
-    +'<div class="doc-sig"><span>حرر بتاريخ: '+t+'</span><br><br><strong>التوقيع والختم</strong></div></div>'
-    +'<div style="margin-top:1.2rem;font-size:.65rem;color:var(--muted);text-align:center;border-top:1px solid var(--b);padding-top:.65rem">*(1) صلاحية هذه الشهادة 6 أشهر</div>';
+  var u=U;
+  var t=new Date().toLocaleDateString('ar-DZ');
+  var refNum='IQ-'+new Date().getFullYear()+'-'+(u.nin||'').substring(0,6);
+
+  var dobDisplay=u.dob||'—';
+  if(u.dob){
+    try{
+      var dp=new Date(u.dob);
+      var mn=['يناير','فبراير','مارس','أبريل','ماي','جوان','جويلية','أوت','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+      dobDisplay=dp.getDate()+' '+mn[dp.getMonth()]+' '+dp.getFullYear();
+    }catch(e){}
+  }
+
+  var fullName=(u.fname||'—')+' '+(u.lname||'—');
+  var fatherFull=(u.fatherFname||'—')+' '+(u.fatherLname||u.lname||'—');
+  var motherFull=(u.motherFname||'—')+' '+(u.motherLname||'—');
+  var commune=u.pob||u.wilaya||'—';
+
+  return [
+    /* === LETTERHEAD === */
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding-bottom:12px;border-bottom:3px solid #1565c0">',
+    '<div style="text-align:center">',
+    '<div style="font-size:7pt;font-weight:800;color:#1565c0;letter-spacing:.5px;line-height:1.6">الجمهورية الجزائرية الديمقراطية الشعبية</div>',
+    '<div style="font-size:6.5pt;color:#5a7066;line-height:1.5">République Algérienne Démocratique et Populaire</div>',
+    '<div style="font-size:7pt;font-weight:700;color:#4a5a52;margin-top:2px">وزارة الداخلية — ولاية: '+(u.wilaya||'—')+'</div>',
+    '</div>',
+    '<div style="text-align:center;flex-shrink:0;margin:0 18px">',
+    '<div style="width:56px;height:56px;border-radius:50%;border:3px solid #1565c0;display:flex;align-items:center;justify-content:center;background:#e3f0ff;margin:0 auto">',
+    '<div style="font-size:6pt;font-weight:800;color:#1565c0;text-align:center;line-height:1.3">الجمهورية<br>الجزائرية</div>',
+    '</div></div>',
+    '<div style="text-align:center">',
+    '<div style="font-size:7pt;font-weight:800;color:#1565c0">بلدية: <strong>'+commune+'</strong></div>',
+    '<div style="font-size:6.5pt;color:#5a7066">Commune: '+commune+'</div>',
+    '</div></div>',
+
+    /* === TITLE === */
+    '<div style="text-align:center;margin:14px 0 10px">',
+    '<div style="display:inline-block;background:#1565c0;color:#fff;font-size:13pt;font-weight:800;padding:5px 28px;border-radius:4px;letter-spacing:1px">بطاقة إقامة</div>',
+    '<div style="font-size:9pt;color:#5a7066;margin-top:4px;font-style:italic">Certificat de Résidence</div>',
+    '</div>',
+
+    /* === REF BAND === */
+    '<div style="display:flex;justify-content:space-between;background:#f4f6f5;border-radius:6px;padding:6px 12px;margin-bottom:14px;font-size:7.5pt;color:#5a7066">',
+    '<span>رقم الوثيقة: <strong style="color:#1a2a22">'+refNum+'</strong></span>',
+    '<span>NIN: <strong style="color:#1a2a22">'+(u.nin||'—')+'</strong></span>',
+    '</div>',
+
+    /* === INTRO === */
+    '<div style="font-size:9pt;line-height:2;margin-bottom:12px;color:#2a3a30">',
+    'نحن، رئيس المجلس الشعبي البلدي لبلدية <strong>'+commune+'</strong> — ولاية <strong>'+(u.wilaya||'—')+'</strong>',
+    '<br><strong style="font-size:10pt">نُشهد ونُقرّ بأن السيد/ة:</strong>',
+    '</div>',
+
+    /* === TABLE === */
+    '<table style="width:100%;border-collapse:collapse;border:1px solid #dde6e2;border-radius:8px;overflow:hidden">',
+    ds('الهوية — Identité'),
+    dv('الاسم واللقب — Nom et Prénom', fullName),
+    dv('تاريخ الميلاد — Date de Naissance', dobDisplay),
+    dv('مكان الميلاد — Lieu de Naissance', commune),
+    dv('الجنسية — Nationalité', 'جزائرية — Algérienne'),
+    dv('رقم التعريف الوطني — NIN', u.nin||'—'),
+    ds('الحالة المدنية — État Civil'),
+    dv('اسم الأب ولقبه', fatherFull),
+    dv('اسم الأم ولقبها قبل الزواج', motherFull),
+    '</table>',
+
+    /* === TEXT === */
+    '<div style="margin-top:14px;font-size:9pt;line-height:2.2;color:#2a3a30;border:1px solid #dde6e2;border-radius:8px;padding:12px 14px;background:#fafcfa">',
+    'يُقيم فعلياً ببلدية <strong>'+commune+'</strong>، ولاية <strong>'+(u.wilaya||'—')+'</strong>.',
+    '<br>وقد سُلِّمت له/لها هذه الوثيقة بناءً على طلبه/ها للإدلاء بها أمام الجهات المختصة وفيما يسمح به القانون.',
+    '</div>',
+
+    /* === SIGNATURES === */
+    '<div style="display:flex;justify-content:space-between;margin-top:22px;padding-top:14px;border-top:1px solid #dde6e2;align-items:flex-end">',
+    '<div style="text-align:center;min-width:120px">',
+    '<div style="width:72px;height:72px;border-radius:50%;border:3px dotted rgba(21,101,192,.35);display:flex;align-items:center;justify-content:center;font-size:6pt;color:rgba(21,101,192,.4);font-weight:800;text-align:center;line-height:1.4;margin:0 auto 5px">الجمهورية<br>الجزائرية<br>الديمقراطية<br>الشعبية</div>',
+    '<div style="font-size:7.5pt;color:#5a7066">ختم البلدية</div>',
+    '</div>',
+    '<div style="text-align:center;font-size:8pt;color:#4a5a52;line-height:2">',
+    '<div>حُرِّر بـ: <strong>'+commune+'</strong></div>',
+    '<div>بتاريخ: <strong>'+t+'</strong></div>',
+    '<div style="margin-top:22px;font-size:8.5pt;font-weight:800;color:#1a2a22">رئيس المجلس الشعبي البلدي</div>',
+    '</div>',
+    '<div style="text-align:center;min-width:120px">',
+    '<div style="width:72px;height:72px;border-radius:50%;border:3px dotted rgba(21,101,192,.35);margin:0 auto 5px"></div>',
+    '<div style="font-size:7.5pt;color:#5a7066">التوقيع</div>',
+    '</div></div>',
+
+    /* === FOOTER === */
+    '<div style="margin-top:12px;font-size:7pt;color:#5a7066;text-align:center;border-top:1px solid #dde6e2;padding-top:8px">',
+    '*(1) صلاحية هذه الوثيقة ثلاثة (3) أشهر من تاريخ الإصدار',
+    '<br>صادرة إلكترونياً عبر منصة <strong>ORDO</strong> — للتحقق تواصل مع البلدية المختصة',
+    '</div>',
+  ].join('');
 }
 
 function printDoc(){
-  var c = document.getElementById('doc-content');
-  if(!c){ toast('لا توجد وثيقة','err'); return; }
-  var w = window.open('','_blank');
-  w.document.write('<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8">'
-    +'<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">'
-    +'<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Cairo,sans-serif;padding:2cm;direction:rtl;color:#1a2a22;font-size:10pt;line-height:2}'
-    +'.doc-off-hdr{text-align:center;border-bottom:2px solid #1a2a22;padding-bottom:.8rem;margin-bottom:1rem}'
-    +'.doc-fr{display:flex;justify-content:space-between;border-bottom:1px dotted #dde6e2;padding:3px 0}'
-    +'.dk{color:#5a7066;font-weight:600}.dv{font-weight:700}'
-    +'.doc-stamp{margin-top:1.5rem;display:flex;justify-content:space-between;align-items:flex-end}'
-    +'.doc-sig{text-align:center}.stamp-c{width:68px;height:68px;border-radius:50%;border:3px solid rgba(27,94,66,.3);display:flex;align-items:center;justify-content:center;font-size:6pt;color:rgba(27,94,66,.4);font-weight:800;text-align:center;line-height:1.3;padding:6px;margin:0 auto 4px}'
-    +'@media print{body{padding:1.5cm}}</style></head><body>'+c.innerHTML+'</body></html>');
+  var docEl=document.getElementById('doc-content');
+  if(!docEl){ toast('لا توجد وثيقة للطباعة','err'); return; }
+  var docHtml=docEl.innerHTML;
+  var isRes=selectedDocType==='res';
+  var accentColor=isRes?'#1565c0':'#1b5e42';
+
+  var w=window.open('','_blank','width=850,height=1100');
+  w.document.write([
+    '<!DOCTYPE html><html dir="rtl" lang="ar"><head>',
+    '<meta charset="UTF-8">',
+    '<title>'+(isRes?'بطاقة إقامة':'شهادة الميلاد')+'</title>',
+    '<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">',
+    '<style>',
+    '  *{margin:0;padding:0;box-sizing:border-box}',
+    '  body{font-family:Cairo,Tajawal,sans-serif;direction:rtl;color:#1a2a22;background:#fff;padding:2cm 2.2cm}',
+    '  table{border-collapse:collapse;width:100%}',
+    '  @page{size:A4;margin:1.8cm 2cm}',
+    '  @media print{',
+    '    body{padding:0}',
+    '    .no-print{display:none}',
+    '  }',
+    '  .watermark{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-35deg);',
+    '    font-family:Tajawal,sans-serif;font-size:72pt;font-weight:800;color:rgba(27,94,66,0.04);',
+    '    pointer-events:none;z-index:0;white-space:nowrap}',
+    '  .content{position:relative;z-index:1}',
+    '  /* Print button */',
+    '  .print-bar{background:'+accentColor+';color:#fff;padding:10px 20px;display:flex;align-items:center;',
+    '    justify-content:space-between;margin-bottom:18px;border-radius:8px;font-size:9pt}',
+    '  .print-bar button{background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.35);',
+    '    border-radius:6px;padding:5px 14px;cursor:pointer;font-family:Cairo,sans-serif;font-size:8.5pt;font-weight:700}',
+    '  .print-bar button:hover{background:rgba(255,255,255,0.3)}',
+    '</style>',
+    '</head><body>',
+    '<div class="watermark no-print">ORDO</div>',
+    '<div class="print-bar no-print">',
+    '  <span style="font-family:Tajawal,sans-serif;font-weight:800;font-size:11pt">ORDO — منصة الوثائق الرسمية</span>',
+    '  <button onclick="window.print()">🖨️ طباعة / حفظ PDF</button>',
+    '</div>',
+    '<div class="content">',
+    docHtml,
+    '</div>',
+    '</body></html>'
+  ].join('\n'));
   w.document.close();
   w.focus();
-  setTimeout(function(){ w.print(); }, 500);
 }
 
 function submitDocReq(){
@@ -1069,6 +1411,25 @@ function renderMyDocs(){
       +'</div>';
   }).join('');
 }
+</script>
+
+<div class="sb-overlay" id="__overlay" onclick="toggleSidebar()"></div>
+<script>
+function toggleSidebar(){
+  var sb=document.querySelector('.sb'),ov=document.getElementById('__overlay');
+  var open=sb.classList.toggle('mob-open');
+  ov.style.display=open?'block':'none';
+  document.body.style.overflow=open?'hidden':'';
+}
+document.querySelectorAll('.ni').forEach(function(ni){
+  ni.addEventListener('click',function(){
+    if(window.innerWidth<=860){
+      document.querySelector('.sb').classList.remove('mob-open');
+      document.getElementById('__overlay').style.display='none';
+      document.body.style.overflow='';
+    }
+  });
+});
 </script>
 </body>
 </html>
